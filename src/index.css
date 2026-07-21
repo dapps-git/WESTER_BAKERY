@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@100;200;300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #FDFBF7;
+    color: #3D2712;
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brown-700 text-cream-50 px-8 py-3 rounded-full font-sans font-normal tracking-widest text-sm uppercase
+           hover:bg-brown-900 transition-all duration-300 hover:scale-105 hover:shadow-lg;
+  }
+
+  .btn-outline {
+    @apply border border-brown-700 text-brown-700 px-8 py-3 rounded-full font-sans font-light tracking-widest text-sm uppercase
+           hover:bg-brown-700 hover:text-cream-50 transition-all duration-300;
+  }
+
+  .section-heading {
+    @apply font-serif text-4xl md:text-5xl text-brown-800 font-light leading-tight;
+  }
+
+  .section-subheading {
+    @apply font-serif text-sm tracking-[0.3em] text-brown-400 uppercase mb-3;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F4EF;
+}
+::-webkit-scrollbar-thumb {
+  background: #C8A27C;
+  border-radius: 3px;
+}
+
+/* Loading screen */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  background: #FDFBF7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
