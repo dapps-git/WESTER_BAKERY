@@ -5,7 +5,6 @@ import { Search, ArrowLeft, X, ChevronRight } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// Fallback one-liner descriptions
 const CAKE_DESCRIPTIONS = {
   chocolate: 'Rich chocolate sponge with smooth truffle frosting.',
   'red velvet': 'Classic red velvet with creamy cheese frosting.',
@@ -30,11 +29,12 @@ const getCakeDescription = (name) => {
 export default function Cakes() {
   const navigate = useNavigate()
   const [cakes, setCakes] = useState([])
-  const [categories, setCategories] = useState([]) // fetched from backend
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState('All')
+  const [selectedItem, setSelectedItem] = useState(null)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -45,7 +45,6 @@ export default function Cakes() {
           axios.get(`${API}/api/categories`),
         ])
         setCakes(pRes.data.filter(p => p.category?.name?.toLowerCase() === 'cakes'))
-        // Only show categories that are "Cakes" sub-types — fall back to all if none
         setCategories(cRes.data)
       } catch {
         /* silent */
@@ -71,125 +70,121 @@ export default function Cakes() {
     return matchSrch && matchCat
   })
 
-  // Build category tabs: "All" + all backend categories that are cake-related
-  // For cake page, show "All" plus any categories named like cake types
   const cakeCategories = [
     { name: 'All', icon: '🎂' },
     ...categories.map(c => ({ name: c.name, icon: c.icon || '🍽️' }))
   ]
 
   return (
-    <div className="min-h-screen font-sans pb-12 bg-white">
-      <div className="max-w-md mx-auto px-4 pt-4">
+    <div className="bg-white min-h-screen font-sans overflow-hidden">
 
-        {/* ── Top Header — Brown / Cream Theme ─────────────── */}
-        <header className="flex items-center justify-between mb-5">
-          <button
-            onClick={handleBack}
-            className="p-1.5 rounded-full text-[#5C3A21] hover:bg-[#EDE8DE]/60 transition-colors"
-          >
-            <ArrowLeft size={22} />
-          </button>
+      {/* ── Fixed Sticky Navbar ────────────────────────────── */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#EDE8DE]/80 shadow-sm">
+        <div className="max-w-md mx-auto px-4 pt-3 pb-2">
 
-          {/* Center — Cormorant Garamond Serif Title */}
-          <div className="flex flex-col items-center">
-            <div className="text-xl leading-none mb-0.5">🎂</div>
-            <h1 className="font-serif italic font-bold text-2xl sm:text-3xl text-[#3D2712] tracking-wide leading-none">
-              Cake Menu
-            </h1>
-            {/* Cream ornament divider */}
-            <div className="flex items-center gap-2 mt-1">
-              <div className="h-px w-8 bg-[#C8A27C]" />
-              <span className="text-[#A87850] text-[10px] font-serif">✦</span>
-              <div className="h-px w-8 bg-[#C8A27C]" />
-            </div>
-          </div>
+          {/* Top row: back | title | search */}
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={handleBack}
+              className="p-1.5 rounded-full text-[#5C3A21] hover:bg-[#EDE8DE]/60 transition-colors"
+            >
+              <ArrowLeft size={20} />
+            </button>
 
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="p-1.5 rounded-full text-[#5C3A21] hover:bg-[#EDE8DE]/60 transition-colors"
-          >
-            <Search size={22} />
-          </button>
-        </header>
-
-        {/* ── Search Bar ─────────────────────────────────────── */}
-        {searchOpen && (
-          <div className="mb-4 animate-fade-in">
-            <div className="relative">
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search cakes..."
-                autoFocus
-                className="w-full pl-4 pr-10 py-2 bg-white border border-[#DED6C8] rounded-full text-sm text-[#3D2712] focus:outline-none focus:border-[#A87850] shadow-sm"
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A87850] hover:text-[#5C3A21]"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── Category Chips from Backend ──────────────────── */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-5 no-scrollbar">
-          {cakeCategories.map((cat) => {
-            const isActive = activeCategory === cat.name
-            return (
-              <div
-                key={cat.name}
-                onClick={() => setActiveCategory(cat.name)}
-                className={`min-w-[56px] sm:min-w-[64px] py-1.5 px-2 rounded-xl text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${
-                  isActive
-                    ? 'text-[#FAF6F0] shadow-md'
-                    : 'bg-white text-[#5C3A21] border border-[#DED6C8] shadow-[0_2px_8px_rgba(90,60,30,0.07)] hover:border-[#C8A27C]'
-                }`}
-                style={isActive ? { background: '#5C3A21' } : {}}
-              >
-                <div className="text-sm mb-0.5">{cat.icon}</div>
-                <span className="block text-[10px] font-semibold tracking-tight whitespace-nowrap">
-                  {cat.name}
-                </span>
+            <div className="flex flex-col items-center">
+              <div className="text-base leading-none mb-0.5">🎂</div>
+              <h1 className="font-serif italic font-bold text-xl sm:text-2xl text-[#3D2712] tracking-wide leading-none">
+                Cake Menu
+              </h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <div className="h-px w-5 bg-[#C8A27C]" />
+                <span className="text-[#A87850] text-[9px] font-serif">✦</span>
+                <div className="h-px w-5 bg-[#C8A27C]" />
               </div>
-            )
-          })}
-        </div>
+            </div>
 
-        {/* ── Loading ──────────────────────────────────────── */}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="p-1.5 rounded-full text-[#5C3A21] hover:bg-[#EDE8DE]/60 transition-colors"
+            >
+              <Search size={20} />
+            </button>
+          </div>
+
+          {/* Search input */}
+          {searchOpen && (
+            <div className="mb-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search cakes..."
+                  autoFocus
+                  className="w-full pl-4 pr-10 py-1.5 bg-white border border-[#DED6C8] rounded-full text-sm text-[#3D2712] focus:outline-none focus:border-[#A87850]"
+                />
+                {search && (
+                  <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A87850]">
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Category chips */}
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {cakeCategories.map((cat) => {
+              const isActive = activeCategory === cat.name
+              return (
+                <div
+                  key={cat.name}
+                  onClick={() => setActiveCategory(cat.name)}
+                  className={`min-w-[52px] py-1.5 px-2 rounded-xl text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-200 shrink-0 ${
+                    isActive
+                      ? 'text-[#FAF6F0] shadow-sm'
+                      : 'bg-white text-[#5C3A21] border border-[#DED6C8]'
+                  }`}
+                  style={isActive ? { background: '#5C3A21' } : {}}
+                >
+                  <div className="text-sm mb-0.5">{cat.icon}</div>
+                  <span className="block text-[10px] font-semibold tracking-tight whitespace-nowrap">
+                    {cat.name}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Scrollable Content (padded below fixed navbar) ── */}
+      <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '168px' : '146px' }}>
+
         {loading && (
           <div className="text-center py-12 text-[#A87850] text-xs tracking-widest animate-pulse font-medium">
             Loading Cake Menu...
           </div>
         )}
 
-        {/* ── Empty State ──────────────────────────────────── */}
         {!loading && filtered.length === 0 && (
           <div className="text-center py-12">
             <p className="text-[#A87850] text-sm font-medium">
               {search ? 'No cakes matched your search.' : 'No cakes added yet.'}
             </p>
             {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="mt-2 text-xs text-[#5C3A21] underline font-semibold"
-              >
+              <button onClick={() => setSearch('')} className="mt-2 text-xs text-[#5C3A21] underline font-semibold">
                 Clear Search
               </button>
             )}
           </div>
         )}
 
-        {/* ── Cake Cards — Brown / Cream Theme ───────────── */}
         <div className="flex flex-col gap-2">
           {filtered.map((item, index) => (
             <div
               key={item._id || index}
+              onClick={() => setSelectedItem(item)}
               className="flex bg-white rounded-2xl overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200"
               style={{
                 border: '1px solid #EDE8DE',
@@ -199,7 +194,7 @@ export default function Cakes() {
                 opacity: 0,
               }}
             >
-              {/* Wide Landscape Rectangle Image */}
+              {/* Image */}
               <div className="w-[140px] sm:w-[170px] h-[96px] sm:h-[112px] shrink-0 overflow-hidden rounded-xl m-1.5"
                 style={{ background: '#F5EDE3' }}>
                 {item.imageUrl ? (
@@ -209,30 +204,23 @@ export default function Cakes() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl text-[#C8A27C]">
-                    🎂
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center text-3xl text-[#C8A27C]">🎂</div>
                 )}
               </div>
 
-              {/* Right — Name, Description, Brown Price, Cream Arrow */}
+              {/* Info */}
               <div className="flex-1 flex items-center justify-between px-3 sm:px-4 py-2 min-w-0">
                 <div className="flex flex-col justify-center min-w-0 pr-2">
-                  {/* Serif title */}
                   <h3 className="font-serif text-sm sm:text-base font-semibold text-[#3D2712] leading-snug line-clamp-1">
                     {item.name}
                   </h3>
-                  {/* One-liner description */}
                   <p className="font-sans text-[10px] sm:text-[11px] text-[#A87850] font-light mt-0.5 line-clamp-2 leading-tight">
                     {getCakeDescription(item.name)}
                   </p>
-                  {/* Brown price */}
                   <span className="font-serif font-extrabold text-sm sm:text-base text-[#5C3A21] mt-1.5">
                     ₹{item.price}
                   </span>
                 </div>
-
-                {/* Cream circular arrow */}
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-all"
                   style={{ background: '#EDE8DE', color: '#5C3A21' }}
@@ -243,8 +231,56 @@ export default function Cakes() {
             </div>
           ))}
         </div>
-
       </div>
+
+      {/* ── Cake Detail Modal ─────────────────────────────── */}
+      {selectedItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+          style={{ background: 'rgba(30,10,5,0.55)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setSelectedItem(null)}
+        >
+          <div
+            className="bg-white w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl"
+            onClick={e => e.stopPropagation()}
+            style={{ animation: 'fadeInUp 0.3s ease-out' }}
+          >
+            {/* Full-size image */}
+            <div className="w-full h-56 sm:h-64 overflow-hidden relative" style={{ background: '#F5EDE3' }}>
+              {selectedItem.imageUrl ? (
+                <img
+                  src={selectedItem.imageUrl}
+                  alt={selectedItem.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-6xl text-[#C8A27C]">🎂</div>
+              )}
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Details */}
+            <div className="px-5 py-4">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <h2 className="font-serif text-xl font-bold text-[#3D2712] leading-snug flex-1">
+                  {selectedItem.name}
+                </h2>
+                <span className="font-serif text-xl font-extrabold text-[#5C3A21] whitespace-nowrap">
+                  ₹{selectedItem.price}
+                </span>
+              </div>
+              <p className="text-sm text-[#A87850] font-sans leading-relaxed">
+                {getCakeDescription(selectedItem.name)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
