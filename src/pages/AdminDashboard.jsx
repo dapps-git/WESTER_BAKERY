@@ -4,6 +4,13 @@ import { Plus, Pencil, Trash2, X, Upload, Tag, Package } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
+// Common food emoji icons to choose from
+const CATEGORY_ICONS = [
+  '🍽️','🥐','🎂','🧁','🍕','🍔','🌮','🥗','🍜','🍛','🍱','🥩',
+  '🥪','🌯','🥙','🥘','🫕','🍲','🥫','🫙','🍞','🥖','🧇','🥞',
+  '🍩','🍪','🍫','🍰','🍮','🍭','🍬','🧃','☕','🧋','🥤','🍵',
+]
+
 export default function AdminDashboard() {
   const [tab, setTab] = useState('products')
 
@@ -17,9 +24,10 @@ export default function AdminDashboard() {
   const fileRef = useRef()
 
   // Category state
-  const [catForm, setCatForm] = useState({ name: '' })
+  const [catForm, setCatForm] = useState({ name: '', icon: '🍽️' })
   const [editingCat, setEditingCat] = useState(null)
   const [catModal, setCatModal] = useState(false)
+  const [showIconPicker, setShowIconPicker] = useState(false)
 
   const [msg, setMsg] = useState(null)
 
@@ -86,8 +94,19 @@ export default function AdminDashboard() {
   }
 
   // ─── Category CRUD ─────────────────────────────────────────────────────────
-  const openAddCat = () => { setEditingCat(null); setCatForm({ name: '' }); setCatModal(true) }
-  const openEditCat = (c) => { setEditingCat(c); setCatForm({ name: c.name }); setCatModal(true) }
+  const openAddCat = () => {
+    setEditingCat(null)
+    setCatForm({ name: '', icon: '🍽️' })
+    setShowIconPicker(false)
+    setCatModal(true)
+  }
+
+  const openEditCat = (c) => {
+    setEditingCat(c)
+    setCatForm({ name: c.name, icon: c.icon || '🍽️' })
+    setShowIconPicker(false)
+    setCatModal(true)
+  }
 
   const submitCat = async () => {
     try {
@@ -113,7 +132,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 font-sans">
       {/* Toast */}
       {msg && (
         <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-sans font-light tracking-wide transition-all
@@ -173,7 +192,9 @@ export default function AdminDashboard() {
                   </div>
                   <div className="p-4">
                     <h3 className="font-serif text-sm text-brown-800 font-normal mb-0.5">{p.name}</h3>
-                    <p className="font-sans text-[10px] text-brown-400 font-extralight mb-1">{p.category?.name || '—'}</p>
+                    <p className="font-sans text-[10px] text-brown-400 font-extralight mb-1">
+                      {p.category?.icon || ''} {p.category?.name || '—'}
+                    </p>
                     <p className="font-serif text-sm text-brown-600 font-medium mb-3">₹{p.price}</p>
                     <div className="flex gap-2">
                       <button onClick={() => openEditProduct(p)}
@@ -206,8 +227,8 @@ export default function AdminDashboard() {
               {categories.map(c => (
                 <div key={c._id} className="bg-white rounded-xl p-5 border border-cream-200 flex items-center justify-between shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-brown-100 flex items-center justify-center">
-                      <Tag size={14} className="text-brown-500" />
+                    <div className="w-10 h-10 rounded-full bg-brown-100 flex items-center justify-center text-xl">
+                      {c.icon || '🍽️'}
                     </div>
                     <p className="font-serif text-sm text-brown-800">{c.name}</p>
                   </div>
@@ -229,7 +250,7 @@ export default function AdminDashboard() {
       {/* ─── Product Modal ─── */}
       {productModal && (
         <div className="fixed inset-0 bg-brown-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-serif text-xl text-brown-800">{editingProduct ? 'Edit Product' : 'Add Product'}</h3>
               <button onClick={() => setProductModal(false)} className="text-brown-400 hover:text-brown-700"><X size={18} /></button>
@@ -241,7 +262,7 @@ export default function AdminDashboard() {
                 <input className="w-full border border-cream-200 rounded-xl px-4 py-2.5 font-sans text-sm text-brown-700 focus:outline-none focus:border-brown-400 transition-colors"
                   value={productForm.name}
                   onChange={e => setProductForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g., Butter Croissant"
+                  placeholder="e.g., Chocolate Truffle Cake"
                 />
               </div>
 
@@ -253,7 +274,7 @@ export default function AdminDashboard() {
                 >
                   <option value="">Select category</option>
                   {categories.map(c => (
-                    <option key={c._id} value={c._id}>{c.name}</option>
+                    <option key={c._id} value={c._id}>{c.icon} {c.name}</option>
                   ))}
                 </select>
               </div>
@@ -264,18 +285,20 @@ export default function AdminDashboard() {
                   type="number"
                   value={productForm.price}
                   onChange={e => setProductForm(f => ({ ...f, price: e.target.value }))}
-                  placeholder="e.g., 150"
+                  placeholder="e.g., 299"
                 />
               </div>
 
               <div>
-                <label className="block font-sans text-[10px] tracking-[0.2em] uppercase text-brown-400 mb-1.5">Product Image</label>
+                <label className="block font-sans text-[10px] tracking-[0.2em] uppercase text-brown-400 mb-1.5">
+                  Product Image <span className="normal-case text-brown-300">(auto-converted to WebP)</span>
+                </label>
                 <div
                   onClick={() => fileRef.current.click()}
                   className="w-full border-2 border-dashed border-cream-300 rounded-xl p-5 flex flex-col items-center gap-2 cursor-pointer hover:border-brown-400 transition-colors"
                 >
                   {imgPreview
-                    ? <img src={imgPreview} className="w-24 h-24 object-cover rounded-lg" />
+                    ? <img src={imgPreview} className="w-28 h-20 object-cover rounded-lg" alt="preview" />
                     : <Upload size={24} className="text-brown-300" />
                   }
                   <p className="font-sans text-xs text-brown-400 font-extralight">
@@ -317,14 +340,50 @@ export default function AdminDashboard() {
               <button onClick={() => setCatModal(false)} className="text-brown-400 hover:text-brown-700"><X size={18} /></button>
             </div>
 
-            <div>
-              <label className="block font-sans text-[10px] tracking-[0.2em] uppercase text-brown-400 mb-1.5">Category Name</label>
-              <input
-                className="w-full border border-cream-200 rounded-xl px-4 py-2.5 font-sans text-sm text-brown-700 focus:outline-none focus:border-brown-400 transition-colors"
-                value={catForm.name}
-                onChange={e => setCatForm({ name: e.target.value })}
-                placeholder="e.g., Cakes"
-              />
+            <div className="flex flex-col gap-4">
+              {/* Category Name */}
+              <div>
+                <label className="block font-sans text-[10px] tracking-[0.2em] uppercase text-brown-400 mb-1.5">Category Name</label>
+                <input
+                  className="w-full border border-cream-200 rounded-xl px-4 py-2.5 font-sans text-sm text-brown-700 focus:outline-none focus:border-brown-400 transition-colors"
+                  value={catForm.name}
+                  onChange={e => setCatForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="e.g., Cakes"
+                />
+              </div>
+
+              {/* Icon Picker */}
+              <div>
+                <label className="block font-sans text-[10px] tracking-[0.2em] uppercase text-brown-400 mb-1.5">Category Icon</label>
+                <button
+                  type="button"
+                  onClick={() => setShowIconPicker(v => !v)}
+                  className="flex items-center gap-3 w-full border border-cream-200 rounded-xl px-4 py-2.5 hover:border-brown-400 transition-colors"
+                >
+                  <span className="text-2xl">{catForm.icon}</span>
+                  <span className="font-sans text-sm text-brown-500">
+                    {showIconPicker ? 'Close picker' : 'Choose icon'}
+                  </span>
+                </button>
+
+                {showIconPicker && (
+                  <div className="mt-2 p-3 border border-cream-200 rounded-xl bg-cream-50 grid grid-cols-8 gap-1.5">
+                    {CATEGORY_ICONS.map(emoji => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          setCatForm(f => ({ ...f, icon: emoji }))
+                          setShowIconPicker(false)
+                        }}
+                        className={`text-xl p-1.5 rounded-lg hover:bg-brown-100 transition-colors ${catForm.icon === emoji ? 'bg-brown-200' : ''}`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex gap-3 mt-6">

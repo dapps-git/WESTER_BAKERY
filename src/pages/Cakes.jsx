@@ -1,277 +1,250 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import { Search, ArrowLeft, X, ChevronRight } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
+// Fallback one-liner descriptions
+const CAKE_DESCRIPTIONS = {
+  chocolate: 'Rich chocolate sponge with smooth truffle frosting.',
+  'red velvet': 'Classic red velvet with creamy cheese frosting.',
+  fruit: 'Light sponge layered with fresh fruits & whipped cream.',
+  cheese: 'Creamy New York style baked cheesecake.',
+  blueberry: 'Soft vanilla sponge filled with juicy blueberry compote.',
+  vanilla: 'Classic vanilla sponge with silky buttercream.',
+  strawberry: 'Fresh strawberry cream layered sponge cake.',
+  mango: 'Tropical mango mousse on a soft sponge base.',
+  black: 'Dark chocolate layers with whipped ganache.',
+  default: 'Handcrafted fresh cake with premium ingredients.',
+}
+
+const getCakeDescription = (name) => {
+  const k = name.toLowerCase()
+  for (const [key, desc] of Object.entries(CAKE_DESCRIPTIONS)) {
+    if (k.includes(key)) return desc
+  }
+  return CAKE_DESCRIPTIONS.default
+}
+
 export default function Cakes() {
+  const navigate = useNavigate()
   const [cakes, setCakes] = useState([])
+  const [categories, setCategories] = useState([]) // fetched from backend
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [activeCategory, setActiveCategory] = useState('All')
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    const fetchCakes = async () => {
+    ;(async () => {
       try {
-        // Fetch all products and filter for 'Cakes' category on the frontend for safety,
-        // and fetch with backend filter as well.
-        const res = await axios.get(`${API}/api/products`)
-        const allProducts = res.data
-        const cakeProducts = allProducts.filter(
-          p => p.category?.name?.toLowerCase() === 'cakes'
-        )
-        setCakes(cakeProducts)
+        const [pRes, cRes] = await Promise.all([
+          axios.get(`${API}/api/products`),
+          axios.get(`${API}/api/categories`),
+        ])
+        setCakes(pRes.data.filter(p => p.category?.name?.toLowerCase() === 'cakes'))
+        // Only show categories that are "Cakes" sub-types — fall back to all if none
+        setCategories(cRes.data)
       } catch {
-        // backend not connected yet
+        /* silent */
       } finally {
         setLoading(false)
       }
-    }
-    fetchCakes()
+    })()
   }, [])
 
-  // 4 circular/square featured categories for Handcrafted Cakes section
-  const HANDCRAFTED_STYLES = [
-    {
-      title: 'HANDCRAFTED CAKES',
-      sub: 'Artisan & Premium',
-      img: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&auto=format&fit=crop&q=80',
-      bgColor: 'bg-[#f5cad2]'
-    },
-    {
-      title: 'FRENCH PASTRIES',
-      sub: 'Classic French Style',
-      img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80',
-      bgColor: 'bg-[#d0d6d6]'
-    },
-    {
-      title: 'SEASONAL SPECIALS',
-      sub: 'Fresh Fruit Mix',
-      img: 'https://images.unsplash.com/photo-1535141192574-5d4897c13636?w=400&auto=format&fit=crop&q=80',
-      bgColor: 'bg-[#f5cad2]'
-    },
-    {
-      title: 'FEDERAL SPECIALS',
-      sub: 'Signature Delights',
-      img: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&auto=format&fit=crop&q=80',
-      bgColor: 'bg-[#d0d6d6]'
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1)
+    } else {
+      navigate('/')
     }
+  }
+
+  const filtered = cakes.filter(c => {
+    const matchSrch = c.name.toLowerCase().includes(search.toLowerCase())
+    const matchCat = activeCategory === 'All' ||
+      c.name.toLowerCase().includes(activeCategory.toLowerCase()) ||
+      c.category?.name === activeCategory
+    return matchSrch && matchCat
+  })
+
+  // Build category tabs: "All" + all backend categories that are cake-related
+  // For cake page, show "All" plus any categories named like cake types
+  const cakeCategories = [
+    { name: 'All', icon: '🎂' },
+    ...categories.map(c => ({ name: c.name, icon: c.icon || '🍽️' }))
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: '#fdf6f8' }}>
-      <Header />
+    <div className="min-h-screen font-sans pb-12 bg-white">
+      <div className="max-w-md mx-auto px-4 pt-4">
 
-      {/* Hero Banner — Pink Theme with Cakes & Roses background */}
-      <section className="relative w-full h-[85vh] min-h-[500px] overflow-hidden flex items-center">
-        {/* Background photo */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1535141192574-5d4897c13636?w=1600&auto=format&fit=crop&q=80')`,
-            backgroundPosition: 'center 35%'
-          }}
-        />
-        {/* Soft pink overlay gradient */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to right, rgba(253, 240, 244, 0.9) 20%, rgba(253, 240, 244, 0.4) 60%, rgba(255, 255, 255, 0) 100%)'
-          }}
-        />
-        
-        {/* Top Right Decorative Roses (Faded background detail) */}
-        <div className="absolute top-10 right-10 opacity-30 pointer-events-none hidden md:block">
-          <img 
-            src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400&auto=format&fit=crop&q=80" 
-            alt="decorative roses" 
-            className="w-80 h-80 object-cover rounded-full mix-blend-multiply filter blur-sm"
-          />
-        </div>
-
-        {/* Text content layout from mockup */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-16 flex flex-col items-start">
-          <h1
-            className="font-serif text-5xl md:text-7xl font-light leading-tight mb-5 text-[#4a2e18]"
-            style={{ textShadow: '0 1px 4px rgba(255,255,255,0.6)' }}
-          >
-            Bite <br />
-            <span className="italic font-normal">into</span> Happiness
-          </h1>
-          
-          {/* CRÈME WOW Tag/Button */}
+        {/* ── Top Header — Brown / Cream Theme ─────────────── */}
+        <header className="flex items-center justify-between mb-5">
           <button
-            className="font-sans text-xs tracking-[0.2em] uppercase font-semibold text-white px-8 py-3 rounded-md shadow-md transition-all duration-300 hover:scale-105"
-            style={{ background: '#e08285' }}
+            onClick={handleBack}
+            className="p-1.5 rounded-full text-[#5C3A21] hover:bg-[#EDE8DE]/60 transition-colors"
           >
-            CRÈME WOW
+            <ArrowLeft size={22} />
           </button>
-        </div>
-      </section>
 
-      {/* 1. HANDCRAFTED CAKES Section */}
-      <section className="py-20 max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="font-serif text-xl tracking-[0.3em] uppercase text-[#4a2e18] font-normal">
-            HANDCRAFTED CAKES
-          </h2>
-          <div className="flex items-center justify-center gap-3 mt-4">
-            <div className="h-0.5 w-12 bg-[#e8c0ce]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#c8849b]" />
-            <div className="h-0.5 w-12 bg-[#e8c0ce]" />
-          </div>
-        </div>
-
-        {/* 4-column layout matching mockup styles */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {HANDCRAFTED_STYLES.map((style, i) => (
-            <div
-              key={style.title}
-              className="group flex flex-col rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 bg-white"
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              {/* Square image */}
-              <div className="aspect-square overflow-hidden bg-cream-50">
-                <img
-                  src={style.img}
-                  alt={style.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              {/* Bottom text banner */}
-              <div className={`p-4 text-center ${style.bgColor} transition-colors duration-300`}>
-                <h3 className="font-serif text-xs font-semibold tracking-wider text-brown-800 leading-tight">
-                  {style.title}
-                </h3>
-                <p className="font-sans text-[9px] text-brown-500 font-light mt-1">
-                  {style.sub}
-                </p>
-              </div>
+          {/* Center — Cormorant Garamond Serif Title */}
+          <div className="flex flex-col items-center">
+            <div className="text-xl leading-none mb-0.5">🎂</div>
+            <h1 className="font-serif italic font-bold text-2xl sm:text-3xl text-[#3D2712] tracking-wide leading-none">
+              Cake Menu
+            </h1>
+            {/* Cream ornament divider */}
+            <div className="flex items-center gap-2 mt-1">
+              <div className="h-px w-8 bg-[#C8A27C]" />
+              <span className="text-[#A87850] text-[10px] font-serif">✦</span>
+              <div className="h-px w-8 bg-[#C8A27C]" />
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 2. FEATUREDS Section */}
-      <section className="py-20 max-w-7xl mx-auto px-6 border-t border-[#f5cad2]/30">
-        <div className="text-center mb-16">
-          <h2 className="font-serif text-xl tracking-[0.3em] uppercase text-[#4a2e18] font-normal">
-            FEATUREDS
-          </h2>
-          <div className="flex items-center justify-center gap-3 mt-4">
-            <div className="h-0.5 w-12 bg-[#e8c0ce]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#c8849b]" />
-            <div className="h-0.5 w-12 bg-[#e8c0ce]" />
           </div>
-        </div>
 
-        {loading && (
-          <div className="text-center py-20 text-brown-300 font-sans text-sm tracking-widest">
-            Loading Featureds...
+          <button
+            onClick={() => setSearchOpen(!searchOpen)}
+            className="p-1.5 rounded-full text-[#5C3A21] hover:bg-[#EDE8DE]/60 transition-colors"
+          >
+            <Search size={22} />
+          </button>
+        </header>
+
+        {/* ── Search Bar ─────────────────────────────────────── */}
+        {searchOpen && (
+          <div className="mb-4 animate-fade-in">
+            <div className="relative">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search cakes..."
+                autoFocus
+                className="w-full pl-4 pr-10 py-2 bg-white border border-[#DED6C8] rounded-full text-sm text-[#3D2712] focus:outline-none focus:border-[#A87850] shadow-sm"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A87850] hover:text-[#5C3A21]"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
           </div>
         )}
 
-        {/* 4-column layout: 3 cake products + 1 pink Valentine's promo card */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          
-          {/* Cake products rendered cleanly without borders or backgrounds */}
-          {cakes.slice(0, 3).map((cake, i) => (
-            <div
-              key={cake._id}
-              className="group flex flex-col justify-between cursor-pointer"
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              <div>
-                {/* Photo ONLY: No card container border or background color */}
-                <div className="aspect-square overflow-hidden rounded-2xl mb-4 relative">
-                  {cake.imageUrl ? (
-                    <img
-                      src={cake.imageUrl}
-                      alt={cake.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-5xl bg-[#fdf0f4]">🎂</div>
-                  )}
-                  {/* Hover Add Button */}
-                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <button className="bg-[#ef4444] text-white text-xs font-sans tracking-widest uppercase font-semibold px-4 py-2 rounded-full shadow-lg">
-                      Order
-                    </button>
-                  </div>
-                </div>
-
-                <div className="px-1 text-center sm:text-left">
-                  <h3 className="font-serif text-sm text-brown-800 font-normal mb-1">
-                    {cake.name}
-                  </h3>
-                  <p className="font-sans text-[10px] text-brown-400 font-light mb-2">
-                    Handcrafted with love
-                  </p>
-                </div>
+        {/* ── Category Chips from Backend ──────────────────── */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-5 no-scrollbar">
+          {cakeCategories.map((cat) => {
+            const isActive = activeCategory === cat.name
+            return (
+              <div
+                key={cat.name}
+                onClick={() => setActiveCategory(cat.name)}
+                className={`min-w-[56px] sm:min-w-[64px] py-1.5 px-2 rounded-xl text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${
+                  isActive
+                    ? 'text-[#FAF6F0] shadow-md'
+                    : 'bg-white text-[#5C3A21] border border-[#DED6C8] shadow-[0_2px_8px_rgba(90,60,30,0.07)] hover:border-[#C8A27C]'
+                }`}
+                style={isActive ? { background: '#5C3A21' } : {}}
+              >
+                <div className="text-sm mb-0.5">{cat.icon}</div>
+                <span className="block text-[10px] font-semibold tracking-tight whitespace-nowrap">
+                  {cat.name}
+                </span>
               </div>
-
-              <div className="px-1 mt-1 text-center sm:text-left">
-                <p className="font-serif text-sm font-semibold text-[#ef4444]">
-                  ₹{cake.price}
-                </p>
-              </div>
-            </div>
-          ))}
-
-          {/* Placeholders if we don't have enough cakes in the database */}
-          {!loading && cakes.length < 3 && [...Array(3 - cakes.length)].map((_, i) => (
-            <div key={`placeholder-${i}`} className="group flex flex-col justify-between opacity-70">
-              <div>
-                <div className="aspect-square overflow-hidden rounded-2xl mb-4 bg-white border border-[#f5cad2]/30 flex items-center justify-center text-5xl">
-                  🎂
-                </div>
-                <div className="px-1">
-                  <h3 className="font-serif text-sm text-brown-800 font-normal mb-1">
-                    Signature Cake
-                  </h3>
-                  <p className="font-sans text-[10px] text-brown-400 font-light mb-2">
-                    Fresh ingredients
-                  </p>
-                </div>
-              </div>
-              <div className="px-1 mt-1">
-                <p className="font-serif text-sm font-semibold text-[#ef4444]">
-                  ₹550
-                </p>
-              </div>
-            </div>
-          ))}
-
-          {/* Promo Card: Valentine's Edition (Matching mockup pink promo block) */}
-          <div className="bg-[#e28389] text-white rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-md min-h-[300px]">
-            <div className="mt-4">
-              <h3 className="font-serif text-lg font-light leading-snug tracking-wide">
-                Valentine's <br />
-                Edition Desserts
-              </h3>
-              <p className="font-sans text-xs font-light mt-3 tracking-wider">
-                Special offer
-              </p>
-              <p className="font-serif text-3xl font-bold mt-2 tracking-wide">
-                15% OFF
-              </p>
-            </div>
-            
-            <div className="w-full mb-2">
-              <button className="w-full bg-[#fdf6f8] text-[#e28389] text-xs font-sans tracking-widest uppercase font-semibold py-2.5 rounded-lg shadow hover:bg-white transition-colors">
-                ORDER NOW
-              </button>
-              <span className="block font-sans text-[9px] mt-2 tracking-widest text-[#fdf6f8]/80">
-                LIMITED STOCKS
-              </span>
-            </div>
-          </div>
-
+            )
+          })}
         </div>
-      </section>
 
-      <Footer />
+        {/* ── Loading ──────────────────────────────────────── */}
+        {loading && (
+          <div className="text-center py-12 text-[#A87850] text-xs tracking-widest animate-pulse font-medium">
+            Loading Cake Menu...
+          </div>
+        )}
+
+        {/* ── Empty State ──────────────────────────────────── */}
+        {!loading && filtered.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-[#A87850] text-sm font-medium">
+              {search ? 'No cakes matched your search.' : 'No cakes added yet.'}
+            </p>
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="mt-2 text-xs text-[#5C3A21] underline font-semibold"
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ── Cake Cards — Brown / Cream Theme ───────────── */}
+        <div className="flex flex-col gap-2">
+          {filtered.map((item, index) => (
+            <div
+              key={item._id || index}
+              className="flex bg-white rounded-2xl overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200"
+              style={{
+                border: '1px solid #EDE8DE',
+                boxShadow: '0 4px 16px rgba(90,60,30,0.06)',
+                animationDelay: `${index * 30}ms`,
+                animation: 'fadeInUp 0.35s ease-out forwards',
+                opacity: 0,
+              }}
+            >
+              {/* Wide Landscape Rectangle Image */}
+              <div className="w-[140px] sm:w-[170px] h-[96px] sm:h-[112px] shrink-0 overflow-hidden rounded-xl m-1.5"
+                style={{ background: '#F5EDE3' }}>
+                {item.imageUrl ? (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-3xl text-[#C8A27C]">
+                    🎂
+                  </div>
+                )}
+              </div>
+
+              {/* Right — Name, Description, Brown Price, Cream Arrow */}
+              <div className="flex-1 flex items-center justify-between px-3 sm:px-4 py-2 min-w-0">
+                <div className="flex flex-col justify-center min-w-0 pr-2">
+                  {/* Serif title */}
+                  <h3 className="font-serif text-sm sm:text-base font-semibold text-[#3D2712] leading-snug line-clamp-1">
+                    {item.name}
+                  </h3>
+                  {/* One-liner description */}
+                  <p className="font-sans text-[10px] sm:text-[11px] text-[#A87850] font-light mt-0.5 line-clamp-2 leading-tight">
+                    {getCakeDescription(item.name)}
+                  </p>
+                  {/* Brown price */}
+                  <span className="font-serif font-extrabold text-sm sm:text-base text-[#5C3A21] mt-1.5">
+                    ₹{item.price}
+                  </span>
+                </div>
+
+                {/* Cream circular arrow */}
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-all"
+                  style={{ background: '#EDE8DE', color: '#5C3A21' }}
+                >
+                  <ChevronRight size={15} strokeWidth={2.5} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </div>
     </div>
   )
 }

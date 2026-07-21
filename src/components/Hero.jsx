@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import heroBg from '../assets/hero_bg.png'
 
 const HERO_SLIDES = [
@@ -12,6 +12,7 @@ export default function Hero() {
   const [current, setCurrent] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const intervalRef = useRef(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 100)
@@ -26,10 +27,6 @@ export default function Hero() {
 
   const slide = HERO_SLIDES[current]
 
-  const scrollToProducts = () => {
-    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   return (
     <section className="relative w-full h-screen min-h-[600px] overflow-hidden">
       {/* Background Image */}
@@ -43,10 +40,9 @@ export default function Hero() {
 
       {/* Central Content */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
-        {/* Floating glass card */}
+        {/* Content */}
         <div
-          className={`max-w-2xl w-full bg-cream-50/75 backdrop-blur-md rounded-3xl shadow-2xl p-10 md:p-14 border border-cream-200/60
-            transition-all duration-1000 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          className={`max-w-2xl w-full p-6 md:p-10 transition-all duration-1000 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           {/* Tag */}
           <p className="section-subheading animate-fade-in">{slide.tag}</p>
@@ -78,16 +74,15 @@ export default function Hero() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="#products"
-              onClick={(e) => { e.preventDefault(); scrollToProducts() }}
+            <button
+              onClick={() => navigate('/menu')}
               className="btn-primary"
             >
               Explore Menu
-            </a>
-            <a href="/cakes" className="btn-outline">
+            </button>
+            <button onClick={() => navigate('/cakes')} className="btn-outline">
               Cake Collection
-            </a>
+            </button>
           </div>
         </div>
 
@@ -105,14 +100,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll cue */}
-      <button
-        onClick={scrollToProducts}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-brown-400 hover:text-brown-700 transition-colors animate-float"
-      >
-        <span className="font-sans text-[10px] tracking-[0.3em] uppercase">Scroll</span>
-        <ChevronDown size={18} />
-      </button>
+
     </section>
   )
 }

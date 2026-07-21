@@ -1,53 +1,49 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Link } from 'react-router-dom'
+import {
+  Search,
+  ArrowLeft,
+  X,
+  Pizza,
+  Beef,
+  Sandwich,
+  IceCream,
+  Coffee,
+  UtensilsCrossed,
+  Cookie,
+  Soup,
+  Utensils,
+} from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// Category image lookup table matching mockup categories
-const CATEGORY_IMAGES = {
-  pastries: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=150&auto=format&fit=crop&q=60',
-  breads: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&auto=format&fit=crop&q=60',
-  cookies: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=150&auto=format&fit=crop&q=60',
-  cakes: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=150&auto=format&fit=crop&q=60',
-  donuts: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=150&auto=format&fit=crop&q=60',
-  donughts: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=150&auto=format&fit=crop&q=60',
-  shawarma: 'https://images.unsplash.com/photo-1642683215881-c30c888d227f?w=150&auto=format&fit=crop&q=60',
-  biryani: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=150&auto=format&fit=crop&q=60',
-  snacks: 'https://images.unsplash.com/photo-1599490659213-e2b9527bb087?w=150&auto=format&fit=crop&q=60',
-  beverages: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=150&auto=format&fit=crop&q=60',
-  all: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&auto=format&fit=crop&q=60',
-  default: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&auto=format&fit=crop&q=60'
-}
-
-// Category subtitles to match mockup (e.g. "Water included" for pastries)
-const CATEGORY_SUBTITLES = {
-  pastries: 'Water included',
-  breads: 'Freshly baked daily',
-  cookies: 'Sweet & crunchy',
-  cakes: 'Artisan crafted slice',
-  donuts: 'Glazed & sweet',
-  donughts: 'Glazed & sweet',
-  shawarma: 'Spiced & wrapped',
-  biryani: 'Aromatic & hot',
-  snacks: 'Crispy bites',
-  beverages: 'Chilled & fresh',
-  default: 'Freshly baked'
+// Helper to map category names to smaller, clean icons
+const getCategoryIcon = (name) => {
+  const k = name.toLowerCase()
+  if (k === 'all') return <UtensilsCrossed size={13} />
+  if (k.includes('pizza')) return <Pizza size={13} />
+  if (k.includes('burger')) return <Beef size={13} />
+  if (k.includes('sandwich')) return <Sandwich size={13} />
+  if (k.includes('pasta')) return <Utensils size={13} />
+  if (k.includes('rice') || k.includes('biryani')) return <Soup size={13} />
+  if (k.includes('snack')) return <Cookie size={13} />
+  if (k.includes('drink') || k.includes('beverage') || k.includes('coffee')) return <Coffee size={13} />
+  if (k.includes('dessert') || k.includes('pastr') || k.includes('cake')) return <IceCream size={13} />
+  return <Utensils size={13} />
 }
 
 export default function ProductsSection() {
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [active, setActive] = useState('All')
   const [loading, setLoading] = useState(true)
-
-  // Sort & Filter state
-  const [sortBy, setSortBy] = useState('popularity')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showSearch, setShowSearch] = useState(false)
+  const [search, setSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
-    const fetchData = async () => {
+    ; (async () => {
       try {
         const [pRes, cRes] = await Promise.all([
           axios.get(`${API}/api/products`),
@@ -56,222 +52,175 @@ export default function ProductsSection() {
         setProducts(pRes.data)
         setCategories(cRes.data)
       } catch {
-        // backend not connected yet, use empty state
+        /* silent */
       } finally {
         setLoading(false)
       }
-    }
-    fetchData()
+    })()
   }, [])
 
-  const getCategoryImage = (catName) => {
-    const key = catName.toLowerCase()
-    return CATEGORY_IMAGES[key] || CATEGORY_IMAGES.default
-  }
+  /* Cakes are shown in their own dedicated page */
+  const visibleCats = categories.filter(c => c.name.toLowerCase() !== 'cakes')
 
-  const getCategorySubtitle = (catName) => {
-    const key = catName?.toLowerCase()
-    return CATEGORY_SUBTITLES[key] || CATEGORY_SUBTITLES.default
-  }
-
-  // Filter out "Cakes" from category selector on homepage
-  const filteredCategories = categories.filter(c => c.name.toLowerCase() !== 'cakes')
-
-  // Filter products by category and search term, excluding Cakes
-  const filteredAndSearched = products.filter(p => {
-    const isCake = p.category?.name?.toLowerCase() === 'cakes'
-    if (isCake) return false
-
-    const matchesCategory = active === 'All' || p.category?.name === active
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesCategory && matchesSearch
+  const filtered = products.filter(p => {
+    if (p.category?.name?.toLowerCase() === 'cakes') return false
+    const matchCat = active === 'All' || p.category?.name === active
+    const matchSrch = p.name.toLowerCase().includes(search.toLowerCase())
+    return matchCat && matchSrch
   })
 
-  // Sort products
-  const sorted = [...filteredAndSearched].sort((a, b) => {
-    if (sortBy === 'price-low') {
-      return a.price - b.price
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1)
+    } else {
+      navigate('/')
     }
-    if (sortBy === 'price-high') {
-      return b.price - a.price
-    }
-    if (sortBy === 'newest') {
-      return new Date(b.createdAt) - new Date(a.createdAt)
-    }
-    return 0
-  })
+  }
 
   return (
-    <section id="products" className="py-24 bg-cream-50 scroll-mt-20">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        {/* Heading */}
-        <div className="text-center mb-14">
-          <p className="section-subheading">Our Fresh Selection</p>
-          <h2 className="section-heading">All Products</h2>
-          <div className="flex items-center justify-center gap-3 mt-4">
-            <div className="h-px w-16 bg-brown-200" />
-            <div className="w-1.5 h-1.5 rounded-full bg-brown-300" />
-            <div className="h-px w-16 bg-brown-200" />
-          </div>
-        </div>
+    <div className="bg-white min-h-screen font-sans text-gray-900 pb-12">
+      <div className="max-w-md mx-auto px-4 pt-4">
 
-        {/* Circular Category selector */}
-        <div className="flex overflow-x-auto no-scrollbar gap-8 md:gap-12 justify-start md:justify-center mb-12 pb-4 border-b border-cream-200">
-          {['All', ...filteredCategories.map(c => c.name)].map(cat => {
+        {/* ── Top Header ─────────────────────────────────── */}
+        <header className="flex items-center justify-between mb-4">
+          <button
+            onClick={handleBack}
+            className="p-1.5 rounded-full text-[#6a2e16] hover:bg-brown-50 transition-colors"
+          >
+            <ArrowLeft size={22} />
+          </button>
+
+          <div className="flex flex-col items-center">
+            <div className="text-xl leading-none mb-0.5">👨‍🍳</div>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#6a2e16] tracking-wider italic leading-none">
+              Food Menu
+            </h2>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <div className="h-px w-6 bg-[#C8A27C]" />
+              <span className="text-[#8C6239] text-[10px] font-serif">⚔</span>
+              <div className="h-px w-6 bg-[#C8A27C]" />
+            </div>
+          </div>
+
+          <button
+            onClick={() => setSearchOpen(!searchOpen)}
+            className="p-1.5 rounded-full text-[#6a2e16] hover:bg-brown-50 transition-colors"
+          >
+            <Search size={22} />
+          </button>
+        </header>
+
+        {/* ── Search Bar Toggle ────────────────────────────── */}
+        {searchOpen && (
+          <div className="mb-4 animate-fade-in">
+            <div className="relative">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search menu..."
+                autoFocus
+                className="w-full pl-4 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-800 focus:outline-none focus:border-[#6a2e16]"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Categories Bar (Warm Brown Theme) ──────────────────────────── */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-5 no-scrollbar">
+          {['All', ...visibleCats.map(c => c.name)].map((cat) => {
             const isActive = active === cat
             return (
-              <button
+              <div
                 key={cat}
                 onClick={() => setActive(cat)}
-                className="flex flex-col items-center min-w-[80px] group relative pb-3 focus:outline-none"
+                className={`min-w-[56px] sm:min-w-[64px] py-1.5 px-2 rounded-xl text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${isActive
+                  ? 'bg-[#6a2e16] text-white shadow-md'
+                  : 'bg-white text-gray-700 border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:border-gray-200'
+                  }`}
               >
-                {/* Circular image thumbnail */}
-                <div className={`w-16 h-16 rounded-full overflow-hidden mb-3 border-2 transition-all duration-300 bg-cream-100 flex items-center justify-center shadow-sm
-                  ${isActive ? 'border-[#ef4444] scale-105 shadow' : 'border-transparent group-hover:border-brown-200 group-hover:scale-102'}`}
-                >
-                  <img
-                    src={getCategoryImage(cat)}
-                    alt={cat}
-                    className="w-full h-full object-cover"
-                  />
+                <div className={isActive ? 'text-white' : 'text-[#6a2e16]'}>
+                  {getCategoryIcon(cat)}
                 </div>
-                {/* Label text */}
-                <span className={`font-sans text-xs tracking-wider font-medium transition-colors duration-200
-                  ${isActive ? 'text-brown-900 font-semibold' : 'text-brown-500 group-hover:text-brown-800'}`}
-                >
+                <span className="block mt-0.5 text-[10px] font-semibold tracking-tight whitespace-nowrap">
                   {cat}
                 </span>
-                {/* Underline bar */}
-                {isActive && (
-                  <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#ef4444] transition-all duration-300" />
-                )}
-              </button>
+              </div>
             )
           })}
         </div>
 
-        {/* Sub-Header / Filters and Sort Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 text-xs tracking-wider uppercase font-sans text-brown-500 border-b border-cream-200/50 pb-4">
-          <div className="normal-case text-sm text-brown-400 font-light">
-            Showing {sorted.length > 0 ? `1–${sorted.length}` : '0'} of {products.length} results
-          </div>
-          
-          <div className="flex items-center gap-6">
-            {/* Filter Toggle */}
-            <div className="relative">
-              <button 
-                onClick={() => setShowSearch(!showSearch)}
-                className="flex items-center gap-1.5 hover:text-brown-800 font-medium transition-colors focus:outline-none"
-              >
-                Filters
-                <svg className={`w-3 h-3 transition-transform ${showSearch ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {showSearch && (
-                <div className="absolute right-0 mt-2 z-20 bg-white border border-cream-200 rounded-xl shadow-lg p-3 w-60 normal-case">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search products..."
-                    className="w-full px-3 py-1.5 border border-cream-200 rounded-lg text-xs text-brown-700 focus:outline-none focus:border-brown-400"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Sort Select */}
-            <div className="flex items-center gap-1.5">
-              <span className="font-light">Sort by:</span>
-              <select 
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent font-medium text-brown-850 border-none outline-none focus:ring-0 cursor-pointer pr-4 uppercase text-xs tracking-wider"
-              >
-                <option value="popularity">Popularity</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="newest">Newest</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
+        {/* ── Loading State ───────────────────────────────── */}
         {loading && (
-          <div className="text-center py-20 text-brown-300 font-sans text-sm tracking-widest animate-pulse">
-            Loading Fresh Selections...
+          <div className="text-center py-12 text-gray-400 text-xs tracking-widest animate-pulse font-medium">
+            Loading Menu...
           </div>
         )}
 
-        {!loading && sorted.length === 0 && (
-          <div className="text-center py-20 text-brown-300 font-sans text-sm tracking-widest">
-            No products found.
+        {/* ── Empty State ─────────────────────────────────── */}
+        {!loading && filtered.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-sm font-medium">No menu items found.</p>
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="mt-2 text-xs text-[#6a2e16] underline font-semibold"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         )}
 
-        {/* Grid showing exactly 4 products per row on all views */}
-        <div className="grid grid-cols-4 gap-3 sm:gap-6 md:gap-8">
-          {sorted.map((product, i) => (
+        {/* ── Products List — Wide Landscape Rectangle Photos ──────── */}
+        <div className="flex flex-col gap-2">
+          {filtered.map((item, index) => (
             <div
-              key={product._id}
-              className="group flex flex-col justify-between cursor-pointer"
-              style={{ 
-                animationDelay: `${i * 50}ms`, 
-                animation: 'fadeInUp 0.6s ease-out forwards', 
-                opacity: 0 
+              key={item._id || index}
+              className="flex bg-white rounded-2xl overflow-hidden border border-gray-100/90 shadow-[0_4px_16px_rgba(0,0,0,0.05)] cursor-pointer group hover:shadow-md transition-all duration-200"
+              style={{
+                animationDelay: `${index * 30}ms`,
+                animation: 'fadeInUp 0.35s ease-out forwards',
+                opacity: 0,
               }}
             >
-              {/* Product Image: raw photo without border or background color */}
-              <div className="relative w-full aspect-square overflow-hidden mb-3">
-                {product.imageUrl ? (
+              {/* Wide Landscape Rectangle Image */}
+              <div className="w-[145px] sm:w-[175px] h-[92px] sm:h-[105px] shrink-0 overflow-hidden rounded-xl m-1.5 bg-gray-50">
+                {item.imageUrl ? (
                   <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-brown-200 text-3xl">🥐</div>
+                  <div className="w-full h-full flex items-center justify-center text-3xl text-gray-300">
+                    🥐
+                  </div>
                 )}
-                
-                {/* Red ADD TO CART overlay button on hover */}
-                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <button className="bg-[#ef4444] text-white text-[8px] sm:text-xs font-sans tracking-wider uppercase font-semibold px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-full shadow-lg transition-transform hover:bg-[#d93838]">
-                    Add
-                  </button>
-                </div>
               </div>
 
-              {/* Product Info: Name & Price on one row, Subtitle below */}
-              <div className="px-0.5">
-                <div className="flex justify-between items-start gap-1">
-                  <h3 className="font-sans text-[10px] sm:text-sm font-semibold text-brown-800 line-clamp-1">
-                    {product.name}
-                  </h3>
-                  <span className="font-sans text-[10px] sm:text-sm font-semibold text-[#ef4444] whitespace-nowrap">
-                    ₹{product.price}
-                  </span>
-                </div>
-                <p className="font-sans text-[9px] sm:text-[11px] text-brown-400 font-light mt-0.5">
-                  {getCategorySubtitle(product.category?.name)}
-                </p>
+              {/* Product Details on Right: Name Left, Price Far Right */}
+              <div className="flex-1 flex justify-between items-center px-3 sm:px-4 py-2 min-w-0">
+                <h3 className="font-serif text-base sm:text-lg font-semibold text-[#3D2712] line-clamp-2 pr-2">
+                  {item.name}
+                </h3>
+                <span className="text-[#6a2e16] text-base sm:text-xl font-extrabold whitespace-nowrap">
+                  ₹{item.price}
+                </span>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Cakes CTA */}
-        <div className="text-center mt-16">
-          <Link
-            to="/cakes"
-            className="font-serif text-base text-brown-600 italic hover:text-brown-900 transition-colors hover:tracking-wider duration-300"
-          >
-            View All Cake Collections →
-          </Link>
-        </div>
       </div>
-    </section>
+    </div>
   )
 }

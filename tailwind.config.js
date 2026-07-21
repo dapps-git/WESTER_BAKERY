@@ -60,6 +60,10 @@ export default {
         'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
         'fade-in': 'fadeIn 1s ease-out forwards',
       },
+      scale: {
+        '102': '1.02',
+        '108': '1.08',
+      },
     },
   },
   plugins: [],

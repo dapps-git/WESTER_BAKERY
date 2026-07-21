@@ -19,11 +19,9 @@ export default function Header() {
   }, [location.pathname])
 
   const navLinks = [
-    { label: 'Home', to: '/' },
-    { label: 'Menu', to: '/#products' },
+    { label: 'Home',  to: '/' },
+    { label: 'Menu',  to: '/menu' },
     { label: 'Cakes', to: '/cakes' },
-    { label: 'About', to: '/#about' },
-    { label: 'Contact', to: '/#contact' },
   ]
 
   // On dark-hero pages and not yet scrolled → use white text

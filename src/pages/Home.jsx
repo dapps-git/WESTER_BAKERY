@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Hero from '../components/Hero'
-import ProductsSection from '../components/ProductsSection'
-import WhyUs from '../components/WhyUs'
-import Reviews from '../components/Reviews'
-import Footer from '../components/Footer'
 
 export default function Home() {
   const [loading, setLoading] = useState(true)
@@ -20,7 +16,7 @@ export default function Home() {
       <div className={`loading-screen ${loading ? '' : 'hidden'}`}>
         <div className="flex flex-col items-center gap-4">
           <p className="font-serif text-3xl font-light tracking-[0.3em] text-brown-700 animate-pulse">WESTERN</p>
-          <p className="font-sans text-[10px] tracking-[0.5em] text-brown-400 uppercase">Bakery & Kitchen</p>
+          <p className="font-sans text-[10px] tracking-[0.5em] text-brown-400 uppercase">Bakery &amp; Kitchen</p>
           <div className="flex gap-1 mt-2">
             {[0, 1, 2].map(i => (
               <div
@@ -33,14 +29,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Site */}
-      <div className={`transition-opacity duration-700 ${loading ? 'opacity-0' : 'opacity-100'}`}>
+      {/* Hero only — full screen, no scrolling */}
+      <div className={`h-screen overflow-hidden transition-opacity duration-700 ${loading ? 'opacity-0' : 'opacity-100'}`}>
         <Header />
         <Hero />
-        <ProductsSection />
-        <WhyUs />
-        <Reviews />
-        <Footer />
       </div>
     </>
   )
