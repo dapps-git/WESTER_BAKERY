@@ -16,17 +16,16 @@ app.use(cors({
 }))
 app.use(express.json())
 
-// Healthcheck & root endpoints
-app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'Western Bakery API running ✅' }))
-app.get('/health', (req, res) => res.json({ status: 'ok', message: 'Western Bakery API running ✅' }))
-app.get('/', (req, res) => res.json({ message: 'Western Bakery API running ✅' }))
+// Routes & Healthcheck (Supports direct, /api, and cPanel full-path mounting)
+const prefixes = ['', '/api', '/WESTERN_BACKERY/api', '/WESTERNBAKERY/api', '/WESTER_BAKERY/api']
 
-// Routes (Supported for both direct and cPanel sub-path mounting)
-app.use('/api/categories', categoryRoutes)
-app.use('/categories', categoryRoutes)
+prefixes.forEach((prefix) => {
+  app.use(`${prefix}/categories`, categoryRoutes)
+  app.use(`${prefix}/products`, productRoutes)
+  app.get(`${prefix}/health`, (req, res) => res.json({ status: 'ok', message: 'Western Bakery API running ✅' }))
+  app.get(`${prefix}`, (req, res) => res.json({ message: 'Western Bakery API running ✅' }))
+})
 
-app.use('/api/products', productRoutes)
-app.use('/products', productRoutes)
 
 
 // Start Server immediately (Required for cPanel Phusion Passenger)
