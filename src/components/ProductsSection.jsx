@@ -167,7 +167,7 @@ export default function ProductsSection() {
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search menu..."
                   autoFocus
-                  className="w-full pl-4 pr-10 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-800 focus:outline-none focus:border-[#6a2e16]"
+                  className="w-full pl-4 pr-10 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-base text-gray-800 focus:outline-none focus:border-[#6a2e16]"
                 />
                 {search && (
                   <button
