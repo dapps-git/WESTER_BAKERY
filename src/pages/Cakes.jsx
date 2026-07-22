@@ -16,6 +16,58 @@ const CUSTOM_STATIC_CAKES = [
 ]
 
 const DEMO_MENU_CAKES = [
+  // ── PASTRY SLICE PIECES ──
+  {
+    _id: 'pc-1',
+    name: 'Choco Truffle Cake (Piece)',
+    category: { name: 'Pieces' },
+    imageUrl: '/cakes/chco.png',
+    description: 'Single slice of rich, dark chocolate truffle cake layered with velvety cocoa ganache.',
+    prices: [{ weight: '1 Piece', price: 90 }],
+  },
+  {
+    _id: 'pc-2',
+    name: 'Red Velvet Pastry (Piece)',
+    category: { name: 'Pieces' },
+    imageUrl: '/cakes/blckpc.png',
+    description: 'Single slice of velvet crimson red sponge layered with smooth cream cheese frosting.',
+    prices: [{ weight: '1 Piece', price: 70 }],
+  },
+  {
+    _id: 'pc-3',
+    name: 'Black Forest Pastry (Piece)',
+    category: { name: 'Pieces' },
+    imageUrl: '/cakes/red.jpg',
+    description: 'Single slice of classic chocolate sponge layered with cherries and whipped cream.',
+    prices: [{ weight: '1 Piece', price: 50 }],
+  },
+  {
+    _id: 'pc-4',
+    name: 'Caramel Pastry (Piece)',
+    category: { name: 'Pieces' },
+    imageUrl: '/cakes/carml.png',
+    description: 'Single slice of butterscotch caramel cake topped with golden caramel drizzle.',
+    prices: [{ weight: '1 Piece', price: 80 }],
+  },
+  {
+    _id: 'pc-5',
+    name: 'Blue Berry Pastry (Piece)',
+    category: { name: 'Pieces' },
+    imageUrl: '/cakes/lbue.png',
+    description: 'Single slice of soft vanilla sponge layered with real blueberry compote.',
+    prices: [{ weight: '1 Piece', price: 70 }],
+  },
+  {
+    _id: 'pc-6',
+    name: 'White Forest Pastry (Piece)',
+    category: { name: 'Pieces' },
+    imageUrl: '/cakes/white.png',
+    description: 'Single slice of white forest vanilla sponge layered with white chocolate curls.',
+    prices: [{ weight: '1 Piece', price: 50 }],
+  },
+
+  // ── FULL CAKES ──
+
   {
     _id: 'c-1',
     name: 'Black Forest Cake',
@@ -254,7 +306,7 @@ export default function Cakes() {
     }
   }
 
-  const cakeCategories = ['All', 'Chocolate', 'Fruit', 'Premium', 'Specialty', 'Red Velvet', 'Nuts & Caramel', 'Custom']
+  const cakeCategories = ['All', 'Pieces', 'Chocolate', 'Fruit', 'Premium', 'Specialty', 'Red Velvet', 'Nuts & Caramel', 'Custom']
 
   const filteredCakes = cakes.filter(c => {
     const matchSrch = c.name.toLowerCase().includes(search.toLowerCase())
