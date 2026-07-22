@@ -85,8 +85,8 @@ const DEMO_FOOD = [
     name: 'Glazed Donut',
     price: 15,
     category: { name: 'Snacks' },
-    imageUrl: '/food/donut.webp',
-    description: 'Soft, fluffy golden glazed donut topped with sweet cocoa glaze.',
+    imageUrl: '/food/donut.png',
+    description: 'Soft, fluffy golden glazed donut topped with sweet strawberry frosting and cocoa sprinkles.',
   },
 
   // ── SANDWICH ──
@@ -95,8 +95,8 @@ const DEMO_FOOD = [
     name: 'Chicken Sandwich',
     price: 90,
     category: { name: 'Sandwich' },
-    imageUrl: '/food/chickensandwich.webp',
-    description: 'Toasted triple layered sandwich filled with shredded chicken, mayo, and fresh veggies.',
+    imageUrl: '/food/chickensandwich.png',
+    description: 'Toasted triple layered sandwich filled with grilled chicken breast, mayo, and fresh lettuce.',
   },
   {
     _id: 'f-9',
@@ -111,8 +111,8 @@ const DEMO_FOOD = [
     name: 'Omelette Sandwich',
     price: 70,
     category: { name: 'Sandwich' },
-    imageUrl: '/food/omlettesandwich.webp',
-    description: 'Fluffy spiced egg omelette stuffed between toasted buttered bread slices.',
+    imageUrl: '/food/omlettesandwich.jpg',
+    description: 'Fluffy spiced egg omelette stuffed between toasted buttered bread slices with avocado & cheese.',
   },
 
   // ── BURGER ──
@@ -139,8 +139,8 @@ const DEMO_FOOD = [
     name: 'Fried Chicken (2 Pieces)',
     price: 140,
     category: { name: 'Fried Chicken' },
-    imageUrl: '/food/fried2.webp',
-    description: '2 pieces of crispy, golden, spicy fried chicken served hot.',
+    imageUrl: '/food/fried2.png',
+    description: '2 pieces of crispy, golden drumsticks fried to perfection.',
   },
   {
     _id: 'f-14',
