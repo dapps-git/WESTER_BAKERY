@@ -9,7 +9,6 @@ const DEMO_CAKES = [
   {
     _id: 'demo-1',
     name: 'Candyland Carnival Cake',
-    price: 450,
     category: { name: 'Birthday Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
     description: 'Decadent dark chocolate layers dripping with rich ganache, topped with fresh strawberries.',
@@ -17,7 +16,6 @@ const DEMO_CAKES = [
   {
     _id: 'demo-2',
     name: 'Rainbow Burst Gem Cake',
-    price: 380,
     category: { name: 'Custom Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
     description: 'Vibrant pink cream layers topped with sprinkles and a mini waffle cone accent.',
@@ -25,7 +23,6 @@ const DEMO_CAKES = [
   {
     _id: 'demo-3',
     name: 'Cherry Blossom Cake',
-    price: 480,
     category: { name: 'Birthday Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
     description: 'Delicate chocolate wafer crust filled with velvety cocoa sponge and festive sprinkles.',
@@ -33,7 +30,6 @@ const DEMO_CAKES = [
   {
     _id: 'demo-4',
     name: 'Cookie Dough Fudge Cake',
-    price: 550,
     category: { name: 'Wedding Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&w=800&q=80',
     description: 'Creamy chocolate rosettes layered over rich sponge cake with rainbow sugar crystals.',
@@ -45,6 +41,7 @@ export default function Cakes() {
   const [cakes, setCakes] = useState(DEMO_CAKES)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState('All')
   const [selectedItem, setSelectedItem] = useState(null)
 
@@ -86,80 +83,96 @@ export default function Cakes() {
   })
 
   return (
-    <div className="bg-[#FAF8F5] min-h-screen font-sans text-gray-900 pb-20">
+    <div className="bg-[#FAF8F5] min-h-screen font-sans text-gray-900 overflow-hidden">
       
-      {/* ── Top Header Section ── */}
-      <div className="max-w-4xl mx-auto px-4 pt-4 sm:pt-6">
-        
-        {/* Navigation Bar */}
-        <div className="flex items-center justify-between mb-3">
-          <button
-            onClick={handleBack}
-            className="p-2 border border-[#EDE8DE] rounded-none bg-white hover:bg-[#FAF6F0] text-[#5C3A21] transition-colors"
-            title="Back"
-          >
-            <ArrowLeft size={20} />
-          </button>
+      {/* ── Fixed Sticky Navbar (Exact Food Menu Theme & Style) ── */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+        <div className="max-w-md mx-auto px-4 pt-3 pb-2">
 
-          {/* Center-aligned Italic Title (Same as Food Menu) */}
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="text-lg leading-none mb-0.5">🎂</div>
-            <h1 className="font-serif italic font-bold text-xl sm:text-2xl text-[#6a2e16] tracking-wider leading-none">
-              Cake Menu
-            </h1>
-            <div className="flex items-center gap-1.5 mt-1">
-              <div className="h-px w-5 bg-[#C8A27C]" />
-              <span className="text-[#8C6239] text-[9px] font-serif">✦</span>
-              <div className="h-px w-5 bg-[#C8A27C]" />
+          {/* Top row: back | centered title | search icon */}
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={handleBack}
+              className="p-1.5 rounded-none text-[#6a2e16] hover:bg-gray-100 transition-colors"
+              title="Back"
+            >
+              <ArrowLeft size={20} />
+            </button>
+
+            {/* Center-aligned Title with Food Menu Theme */}
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="text-base leading-none mb-0.5">🎂</div>
+              <h1 className="font-serif italic font-bold text-xl sm:text-2xl text-[#6a2e16] tracking-wider leading-none">
+                Cake Menu
+              </h1>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="h-px w-5 bg-[#C8A27C]" />
+                <span className="text-[#8C6239] text-[9px] font-serif">✦</span>
+                <div className="h-px w-5 bg-[#C8A27C]" />
+              </div>
             </div>
+
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="p-1.5 rounded-none text-[#6a2e16] hover:bg-gray-100 transition-colors"
+              title="Search"
+            >
+              <Search size={20} />
+            </button>
           </div>
 
-          <div className="w-9" /> {/* Spacer for symmetry */}
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative my-4">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A87850]" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search for your favorite cake..."
-            className="w-full pl-11 pr-10 py-2.5 bg-white border border-[#DED6C8] text-sm text-[#3D2712] rounded-none focus:outline-none focus:border-[#6a2e16] transition-all placeholder:text-[#A87850]/60 font-medium"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A87850] hover:text-[#6a2e16]">
-              <X size={16} />
-            </button>
+          {/* Collapsible Search Input */}
+          {searchOpen && (
+            <div className="mb-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search cake menu..."
+                  autoFocus
+                  className="w-full pl-4 pr-10 py-1.5 bg-gray-50 border border-gray-200 rounded-none text-sm text-gray-800 focus:outline-none focus:border-[#6a2e16]"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
           )}
+
+          {/* Category Chips inside Sticky Navbar */}
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {cakeCategories.map((cat) => {
+              const isActive = activeCategory === cat
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`py-1.5 px-3.5 rounded-none text-center flex items-center justify-center cursor-pointer transition-all duration-200 shrink-0 font-sans text-xs font-semibold tracking-tight whitespace-nowrap ${
+                    isActive
+                      ? 'bg-[#6a2e16] text-white shadow-sm border border-[#6a2e16]'
+                      : 'bg-white text-gray-700 border border-gray-100 hover:border-[#C8A27C] hover:bg-[#FAF6F0] shadow-[0_1px_4px_rgba(0,0,0,0.04)]'
+                  }`}
+                >
+                  {cat}
+                </button>
+              )
+            })}
+          </div>
         </div>
+      </div>
 
-        {/* Category Chips (Same style as Food Menu) */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-6 justify-start sm:justify-center">
-          {cakeCategories.map((cat) => {
-            const isActive = activeCategory === cat
-            return (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`py-2 px-4.5 rounded-none text-center flex items-center justify-center cursor-pointer transition-all duration-200 shrink-0 font-sans text-xs font-semibold tracking-tight whitespace-nowrap ${
-                  isActive
-                    ? 'bg-[#6a2e16] text-white shadow-sm border border-[#6a2e16]'
-                    : 'bg-white text-gray-700 border border-[#EDE8DE] hover:border-[#C8A27C] hover:bg-[#FAF6F0] shadow-[0_1px_4px_rgba(0,0,0,0.04)]'
-                }`}
-              >
-                {cat}
-              </button>
-            )
-          })}
-        </div>
+      {/* ── Scrollable Content (padded below fixed navbar) ── */}
+      <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '168px' : '146px' }}>
 
-
-
-        {/* ── Cake Grid Section ── */}
         {loading && (
           <div className="text-center py-16 text-[#A87850] text-xs tracking-widest animate-pulse font-medium">
-            Loading Cake Collection...
+            Loading Cake Menu...
           </div>
         )}
 
@@ -197,7 +210,7 @@ export default function Cakes() {
                 )}
               </div>
 
-              {/* Bottom Details (Same typography as Food Menu) */}
+              {/* Bottom Details */}
               <div className="p-3.5 sm:p-4 bg-white flex flex-col justify-center flex-1">
                 <h2 className="font-serif font-semibold text-sm sm:text-base text-[#3D2712] line-clamp-2 leading-snug group-hover:text-[#6a2e16] transition-colors text-center">
                   {item.name}
@@ -246,7 +259,6 @@ export default function Cakes() {
               <p className="text-xs text-[#A87850] font-sans leading-relaxed mb-4 text-center">
                 {selectedItem.description || 'Handcrafted fresh cake made with premium bakery ingredients and finest chocolate.'}
               </p>
-
 
               <button
                 onClick={() => setSelectedItem(null)}
