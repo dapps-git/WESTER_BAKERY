@@ -5,7 +5,22 @@ import { Search, ArrowLeft, X } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-const DEMO_CAKES = [
+const CUSTOM_STATIC_CAKES = [
+  { _id: 'cust-1', imageUrl: '/custom/1.avif', category: { name: 'Custom' } },
+  { _id: 'cust-2', imageUrl: '/custom/3.avif', category: { name: 'Custom' } },
+  { _id: 'cust-3', imageUrl: '/custom/9.avif', category: { name: 'Custom' } },
+  { _id: 'cust-4', imageUrl: '/custom/10.avif', category: { name: 'Custom' } },
+  { _id: 'cust-5', imageUrl: '/custom/17.avif', category: { name: 'Custom' } },
+  { _id: 'cust-6', imageUrl: '/custom/1000796798.jpg.jpeg', category: { name: 'Custom' } },
+  { _id: 'cust-7', imageUrl: '/custom/1000805921.jpg.jpeg', category: { name: 'Custom' } },
+  { _id: 'cust-8', imageUrl: '/cake1.png', category: { name: 'Custom' } },
+  { _id: 'cust-9', imageUrl: '/cake2.png', category: { name: 'Custom' } },
+  { _id: 'cust-10', imageUrl: '/cake3.png', category: { name: 'Custom' } },
+  { _id: 'cust-11', imageUrl: '/cake4.png', category: { name: 'Custom' } },
+  { _id: 'cust-12', imageUrl: '/cake5.png', category: { name: 'Custom' } },
+]
+
+const DEMO_MENU_CAKES = [
   {
     _id: 'c-1',
     name: 'Black Forest Cake',
@@ -194,48 +209,44 @@ const DEMO_CAKES = [
       { weight: '1 kg', price: 780 },
     ],
   },
-  {
-    _id: 'c-19',
-    name: 'Rainbow Unicorn Birthday Cake',
-    category: { name: 'Custom' },
-    imageUrl: '/cake1.png',
-    description: 'Custom 2-tier rainbow unicorn birthday cake with colorful sphere accents and golden Happy Birthday topper.',
-    prices: [
-      { weight: '1 kg', price: 1500 },
-    ],
-  },
 ]
 
 export default function Cakes() {
   const navigate = useNavigate()
-  const [cakes, setCakes] = useState(DEMO_CAKES)
-  const [loading, setLoading] = useState(true)
+  const [cakes, setCakes] = useState(DEMO_MENU_CAKES)
+  const [customCakes, setCustomCakes] = useState(CUSTOM_STATIC_CAKES)
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState('All')
   const [selectedItem, setSelectedItem] = useState(null)
   const [selectedWeightIdx, setSelectedWeightIdx] = useState(0)
+  const [lightboxImg, setLightboxImg] = useState(null)
 
   useEffect(() => {
     window.scrollTo(0, 0)
     ;(async () => {
       try {
         const pRes = await axios.get(`${API}/api/products`)
-        const apiCakes = pRes.data.filter(p => p.category?.name?.toLowerCase() === 'cakes')
-        if (apiCakes && apiCakes.length > 0) {
-          // Merge API cakes with menu cakes
-          const formattedApiCakes = apiCakes.map(c => ({
-            ...c,
-            prices: c.prices || [{ weight: '1 kg', price: c.price || 600 }]
-          }))
-          setCakes([...formattedApiCakes, ...DEMO_CAKES])
-        } else {
-          setCakes(DEMO_CAKES)
+        if (pRes.data && pRes.data.length > 0) {
+          const apiCakes = pRes.data.filter(p => p.category?.name?.toLowerCase() === 'cakes' || p.category?.name?.toLowerCase().includes('cake'))
+          
+          // Separate standard cakes vs custom cakes added via Admin Dashboard
+          const apiCustom = apiCakes.filter(c => c.category?.name?.toLowerCase().includes('custom'))
+          const apiStandard = apiCakes.filter(c => !c.category?.name?.toLowerCase().includes('custom'))
+
+          if (apiCustom.length > 0) {
+            setCustomCakes([...apiCustom, ...CUSTOM_STATIC_CAKES])
+          }
+          if (apiStandard.length > 0) {
+            const formattedApiCakes = apiStandard.map(c => ({
+              ...c,
+              prices: c.prices || [{ weight: '1 kg', price: c.price || 600 }]
+            }))
+            setCakes([...formattedApiCakes, ...DEMO_MENU_CAKES])
+          }
         }
       } catch {
-        setCakes(DEMO_CAKES)
-      } finally {
-        setLoading(false)
+        /* static fallbacks */
       }
     })()
   }, [])
@@ -250,12 +261,17 @@ export default function Cakes() {
 
   const cakeCategories = ['All', 'Chocolate', 'Fruit', 'Premium', 'Specialty', 'Red Velvet', 'Nuts & Caramel', 'Custom']
 
-  const filtered = cakes.filter(c => {
+  const filteredCakes = cakes.filter(c => {
     const matchSrch = c.name.toLowerCase().includes(search.toLowerCase())
     const matchCat = activeCategory === 'All' ||
       c.name.toLowerCase().includes(activeCategory.toLowerCase()) ||
       c.category?.name?.toLowerCase().includes(activeCategory.toLowerCase())
     return matchSrch && matchCat
+  })
+
+  const filteredCustom = customCakes.filter(c => {
+    if (!search) return true
+    return (c.name || '').toLowerCase().includes(search.toLowerCase())
   })
 
   const openCakeModal = (item) => {
@@ -323,7 +339,7 @@ export default function Cakes() {
                   type="text"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Search cake menu..."
+                  placeholder="Search cakes..."
                   autoFocus
                   className="w-full pl-4 pr-10 py-1.5 bg-gray-50 border border-gray-200 rounded-none text-base text-gray-800 focus:outline-none focus:border-[#6a2e16]"
                 />
@@ -361,72 +377,142 @@ export default function Cakes() {
         </div>
       </div>
 
-      {/* ── Scrollable Content (padded below fixed navbar) ── */}
+      {/* ── Scrollable Content ── */}
       <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '192px' : '170px' }}>
 
-        {filtered.length === 0 && (
-          <div className="text-center py-16 bg-white border border-[#EDE8DE] p-8 rounded-none">
-            <p className="text-[#A87850] text-sm font-medium">No cakes found matching your search.</p>
-            {search && (
-              <button onClick={() => setSearch('')} className="mt-3 text-xs text-[#6a2e16] underline font-semibold">
-                Clear Search
-              </button>
+        {/* ── CUSTOMIZED CAKES SECTION (PURE IMAGE GALLERY WITH FULL-SIZE LIGHTBOX) ── */}
+        {activeCategory === 'Custom' ? (
+          <div>
+            <div className="text-center mb-4">
+              <h2 className="font-serif italic font-bold text-lg text-[#6a2e16]">
+                Customized Cake Gallery
+              </h2>
+              <p className="text-[11px] text-[#8C6239] font-medium mt-0.5">
+                Tap any photo to view full size
+              </p>
+            </div>
+
+            {filteredCustom.length === 0 && (
+              <div className="text-center py-16 bg-white border border-[#EDE8DE] p-8 rounded-none">
+                <p className="text-[#A87850] text-sm font-medium">No customized cakes found.</p>
+              </div>
             )}
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
+              {filteredCustom.map((item, index) => (
+                <div
+                  key={item._id || index}
+                  onClick={() => setLightboxImg(item.imageUrl)}
+                  className="aspect-square bg-gray-100 rounded-none overflow-hidden cursor-pointer group border border-[#EDE8DE] hover:border-[#6a2e16] transition-all duration-300 relative shadow-2xs"
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt="Customized Cake"
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.src = '/cake1.png'
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 bg-black/75 text-white text-[10px] font-bold px-2 py-1 rounded-none transition-opacity uppercase tracking-wider">
+                      🔍 Full View
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* ── STANDARD MENU CAKES GRID ── */
+          <div>
+            {filteredCakes.length === 0 && (
+              <div className="text-center py-16 bg-white border border-[#EDE8DE] p-8 rounded-none">
+                <p className="text-[#A87850] text-sm font-medium">No cakes found matching your search.</p>
+                {search && (
+                  <button onClick={() => setSearch('')} className="mt-3 text-xs text-[#6a2e16] underline font-semibold">
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
+              {filteredCakes.map((item, index) => {
+                const minPrice = item.prices ? Math.min(...item.prices.map(p => p.price)) : item.price
+                const weightBadge = item.prices ? item.prices.map(p => p.weight).join(' / ') : ''
+
+                return (
+                  <div
+                    key={item._id || index}
+                    onClick={() => openCakeModal(item)}
+                    className="bg-white border border-[#EDE8DE] rounded-none overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                  >
+                    {/* Top Image Container */}
+                    <div className="w-full aspect-[4/3] sm:aspect-square bg-[#F5EDE3] overflow-hidden relative">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl text-[#C8A27C]">🎂</div>
+                      )}
+
+                      {weightBadge && (
+                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none">
+                          {weightBadge}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom Details */}
+                    <div className="p-3 sm:p-3.5 bg-white flex flex-col justify-between flex-1 text-center">
+                      <h2 className="font-serif font-semibold text-xs sm:text-sm text-[#3D2712] line-clamp-2 leading-snug group-hover:text-[#6a2e16] transition-colors mb-1">
+                        {item.name}
+                      </h2>
+                      {minPrice && (
+                        <div className="font-serif font-extrabold text-xs sm:text-sm text-[#6a2e16] mt-auto">
+                          ₹{minPrice} {item.prices?.length > 1 ? <span className="text-[10px] text-gray-500 font-sans font-normal">(500g)</span> : ''}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
-          {filtered.map((item, index) => {
-            const minPrice = item.prices ? Math.min(...item.prices.map(p => p.price)) : item.price
-            const weightBadge = item.prices ? item.prices.map(p => p.weight).join(' / ') : ''
-
-            return (
-              <div
-                key={item._id || index}
-                onClick={() => openCakeModal(item)}
-                className="bg-white border border-[#EDE8DE] rounded-none overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-              >
-                {/* Top Image Container */}
-                <div className="w-full aspect-[4/3] sm:aspect-square bg-[#F5EDE3] overflow-hidden relative">
-                  {item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80'
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl text-[#C8A27C]">🎂</div>
-                  )}
-
-                  {/* Weight badge overlay */}
-                  {weightBadge && (
-                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none">
-                      {weightBadge}
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom Details */}
-                <div className="p-3 sm:p-3.5 bg-white flex flex-col justify-between flex-1 text-center">
-                  <h2 className="font-serif font-semibold text-xs sm:text-sm text-[#3D2712] line-clamp-2 leading-snug group-hover:text-[#6a2e16] transition-colors mb-1">
-                    {item.name}
-                  </h2>
-                  {minPrice && (
-                    <div className="font-serif font-extrabold text-xs sm:text-sm text-[#6a2e16] mt-auto">
-                      ₹{minPrice} {item.prices?.length > 1 ? <span className="text-[10px] text-gray-500 font-sans font-normal">(500g)</span> : ''}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
       </div>
 
-      {/* ── Gorgeous Interactive Cake Detail Modal ── */}
+      {/* ── FULL-SCREEN LIGHTBOX MODAL FOR CUSTOM CAKES ── */}
+      {lightboxImg && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setLightboxImg(null)}
+        >
+          <div className="relative max-w-3xl max-h-[90vh] w-full h-full flex items-center justify-center">
+            <button
+              onClick={() => setLightboxImg(null)}
+              className="absolute top-2 right-2 z-10 p-2.5 bg-black/75 text-white rounded-none hover:bg-black transition-colors"
+              title="Close Full View"
+            >
+              <X size={22} />
+            </button>
+            <img
+              src={lightboxImg}
+              alt="Customized Cake Full View"
+              className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-none border border-white/20"
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── STANDARD CAKE DETAIL MODAL ── */}
       {selectedItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -437,7 +523,6 @@ export default function Cakes() {
             className="bg-white w-full max-w-sm rounded-none border border-[#EDE8DE] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           >
-            {/* Full Image */}
             <div className="w-full h-64 bg-[#F5EDE3] relative">
               {selectedItem.imageUrl ? (
                 <img
@@ -456,7 +541,6 @@ export default function Cakes() {
               </button>
             </div>
 
-            {/* Modal Body */}
             <div className="p-5">
               <div className="text-center mb-3">
                 <span className="text-[10px] font-bold text-[#8C6239] uppercase tracking-widest bg-[#FAF6F0] px-2 py-0.5 border border-[#EDE8DE]">
@@ -471,7 +555,6 @@ export default function Cakes() {
                 {selectedItem.description}
               </p>
 
-              {/* Weight & Price Selector */}
               {selectedItem.prices && selectedItem.prices.length > 0 && (
                 <div className="mb-5 bg-[#FAF8F5] p-3 border border-[#EDE8DE] rounded-none">
                   <p className="text-[11px] font-bold text-[#5C3A21] mb-2 text-center uppercase tracking-wider">
