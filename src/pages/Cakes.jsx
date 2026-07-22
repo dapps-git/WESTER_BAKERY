@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Search, ArrowLeft, X, Star } from 'lucide-react'
+import { Search, ArrowLeft, X } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -9,38 +9,34 @@ const DEMO_CAKES = [
   {
     _id: 'demo-1',
     name: 'Candyland Carnival Cake',
-    price: 14.0,
+    price: 450,
     category: { name: 'Birthday Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
     description: 'Decadent dark chocolate layers dripping with rich ganache, topped with fresh strawberries.',
-    rating: 4.9,
   },
   {
     _id: 'demo-2',
     name: 'Rainbow Burst Gem Cake',
-    price: 12.0,
+    price: 380,
     category: { name: 'Custom Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
     description: 'Vibrant pink cream layers topped with sprinkles and a mini waffle cone accent.',
-    rating: 4.8,
   },
   {
     _id: 'demo-3',
     name: 'Cherry Blossom Cake',
-    price: 16.0,
+    price: 480,
     category: { name: 'Birthday Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
     description: 'Delicate chocolate wafer crust filled with velvety cocoa sponge and festive sprinkles.',
-    rating: 4.9,
   },
   {
     _id: 'demo-4',
     name: 'Cookie Dough Fudge Cake',
-    price: 18.0,
+    price: 550,
     category: { name: 'Wedding Cakes' },
     imageUrl: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&w=800&q=80',
     description: 'Creamy chocolate rosettes layered over rich sponge cake with rainbow sugar crystals.',
-    rating: 5.0,
   },
 ]
 
@@ -79,7 +75,13 @@ export default function Cakes() {
     }
   }
 
-  const cakeCategoryNames = ['All', 'Wedding Cakes', 'Birthday Cakes', 'Cupcakes', 'Custom Cakes']
+  const cakeCategories = [
+    { name: 'All', icon: '✨' },
+    { name: 'Wedding Cakes', icon: '💍' },
+    { name: 'Birthday Cakes', icon: '🎉' },
+    { name: 'Cupcakes', icon: '🧁' },
+    { name: 'Custom Cakes', icon: '🎨' },
+  ]
 
   const filtered = cakes.filter(c => {
     const matchSrch = c.name.toLowerCase().includes(search.toLowerCase())
@@ -95,52 +97,65 @@ export default function Cakes() {
       {/* ── Top Header Section ── */}
       <div className="max-w-4xl mx-auto px-4 pt-4 sm:pt-6">
         
-        {/* Clean Header: Back Button + "Cakes" */}
-        <div className="flex items-center gap-3 mb-5">
+        {/* Navigation Bar */}
+        <div className="flex items-center justify-between mb-3">
           <button
             onClick={handleBack}
-            className="p-2 border border-gray-300 rounded-none bg-white hover:bg-gray-100 text-gray-800 transition-colors shadow-2xs"
+            className="p-2 border border-[#EDE8DE] rounded-none bg-white hover:bg-[#FAF6F0] text-[#5C3A21] transition-colors"
             title="Back"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} />
           </button>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-            Cakes
-          </h1>
+
+          {/* Center-aligned Italic Title (Same as Food Menu) */}
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="text-lg leading-none mb-0.5">🎂</div>
+            <h1 className="font-serif italic font-bold text-xl sm:text-2xl text-[#6a2e16] tracking-wider leading-none">
+              Cake Menu
+            </h1>
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className="h-px w-5 bg-[#C8A27C]" />
+              <span className="text-[#8C6239] text-[9px] font-serif">✦</span>
+              <div className="h-px w-5 bg-[#C8A27C]" />
+            </div>
+          </div>
+
+          <div className="w-9" /> {/* Spacer for symmetry */}
         </div>
 
         {/* Search Bar */}
-        <div className="relative mb-4">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative my-4">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A87850]" />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search for your favorite cake..."
-            className="w-full pl-11 pr-10 py-2.5 bg-white border border-gray-300 text-sm text-gray-900 rounded-none focus:outline-none focus:border-[#6a2e16] transition-all placeholder:text-gray-400 font-medium shadow-2xs"
+            className="w-full pl-11 pr-10 py-2.5 bg-white border border-[#DED6C8] text-sm text-[#3D2712] rounded-none focus:outline-none focus:border-[#6a2e16] transition-all placeholder:text-[#A87850]/60 font-medium"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A87850] hover:text-[#6a2e16]">
               <X size={16} />
             </button>
           )}
         </div>
 
-        {/* Pretty Category Pills */}
+        {/* Pretty & Elegant Category Section */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-6">
-          {cakeCategoryNames.map((cat) => {
-            const isActive = activeCategory === cat
+          {cakeCategories.map((cat) => {
+            const isActive = activeCategory === cat.name
             return (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`py-2 px-4.5 text-xs font-bold whitespace-nowrap rounded-none border transition-all duration-200 ${
+                key={cat.name}
+                onClick={() => setActiveCategory(cat.name)}
+                className={`py-2 px-4 text-xs font-semibold whitespace-nowrap rounded-none transition-all duration-200 flex items-center gap-1.5 border shrink-0 ${
                   isActive
                     ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:bg-gray-50'
+                    : 'bg-white text-[#5C3A21] border-[#EDE8DE] hover:border-[#C8A27C] hover:bg-[#FAF6F0]'
                 }`}
               >
-                {cat}
+                <span className="text-xs">{cat.icon}</span>
+                <span>{cat.name}</span>
               </button>
             )
           })}
@@ -148,17 +163,17 @@ export default function Cakes() {
 
         {/* ── Cake Grid Section ── */}
         {loading && (
-          <div className="text-center py-16 text-gray-400 text-xs tracking-widest animate-pulse font-medium">
+          <div className="text-center py-16 text-[#A87850] text-xs tracking-widest animate-pulse font-medium">
             Loading Cake Collection...
           </div>
         )}
 
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-16 bg-white border border-gray-200 p-8 rounded-none">
-            <p className="text-gray-500 text-sm font-medium">No cakes found matching your selection.</p>
+          <div className="text-center py-16 bg-white border border-[#EDE8DE] p-8 rounded-none">
+            <p className="text-[#A87850] text-sm font-medium">No cakes found matching your search.</p>
             {search && (
               <button onClick={() => setSearch('')} className="mt-3 text-xs text-[#6a2e16] underline font-semibold">
-                Clear Search Filter
+                Clear Search
               </button>
             )}
           </div>
@@ -169,10 +184,10 @@ export default function Cakes() {
             <div
               key={item._id || index}
               onClick={() => setSelectedItem(item)}
-              className="bg-white border border-gray-200/90 rounded-none overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+              className="bg-white border border-[#EDE8DE] rounded-none overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 flex flex-col justify-between"
             >
               {/* Top Image Container */}
-              <div className="w-full aspect-[4/3] sm:aspect-square bg-gray-100 overflow-hidden relative">
+              <div className="w-full aspect-[4/3] sm:aspect-square bg-[#F5EDE3] overflow-hidden relative">
                 {item.imageUrl ? (
                   <img
                     src={item.imageUrl}
@@ -183,24 +198,18 @@ export default function Cakes() {
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl text-gray-300">🎂</div>
+                  <div className="w-full h-full flex items-center justify-center text-4xl text-[#C8A27C]">🎂</div>
                 )}
-                
-                {/* Rating Badge */}
-                <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/65 backdrop-blur-xs text-white text-[10px] font-bold rounded-none flex items-center gap-1">
-                  <Star size={10} className="fill-yellow-400 text-yellow-400" />
-                  <span>{item.rating || '4.9'}</span>
-                </div>
               </div>
 
-              {/* Bottom Details */}
+              {/* Bottom Details (Same typography as Food Menu) */}
               <div className="p-3.5 sm:p-4 bg-white flex flex-col justify-between flex-1">
-                <h2 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 mb-1.5 leading-tight group-hover:text-[#6a2e16] transition-colors">
+                <h2 className="font-serif font-semibold text-sm sm:text-base text-[#3D2712] line-clamp-2 mb-1.5 leading-snug group-hover:text-[#6a2e16] transition-colors">
                   {item.name}
                 </h2>
 
-                <div className="font-extrabold text-sm sm:text-base text-gray-900 mt-auto pt-1">
-                  ${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}
+                <div className="font-serif font-extrabold text-sm sm:text-base text-[#6a2e16] mt-auto pt-1">
+                  ₹{item.price}
                 </div>
               </div>
             </div>
@@ -212,14 +221,14 @@ export default function Cakes() {
       {selectedItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
+          style={{ background: 'rgba(30,10,5,0.6)', backdropFilter: 'blur(4px)' }}
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="bg-white w-full max-w-sm rounded-none border border-gray-300 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+            className="bg-white w-full max-w-sm rounded-none border border-[#EDE8DE] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           >
-            <div className="w-full h-64 bg-gray-100 relative">
+            <div className="w-full h-64 bg-[#F5EDE3] relative">
               {selectedItem.imageUrl ? (
                 <img
                   src={selectedItem.imageUrl}
@@ -239,20 +248,20 @@ export default function Cakes() {
 
             <div className="p-5">
               <div className="flex items-start justify-between gap-3 mb-2">
-                <h3 className="font-bold text-lg text-gray-900 leading-snug">
+                <h3 className="font-serif text-lg font-bold text-[#3D2712] leading-snug">
                   {selectedItem.name}
                 </h3>
-                <span className="font-extrabold text-xl text-[#6a2e16] whitespace-nowrap">
-                  ${typeof selectedItem.price === 'number' ? selectedItem.price.toFixed(2) : selectedItem.price}
+                <span className="font-serif text-xl font-extrabold text-[#6a2e16] whitespace-nowrap">
+                  ₹{selectedItem.price}
                 </span>
               </div>
-              <p className="text-xs text-gray-500 leading-relaxed mb-4">
+              <p className="text-xs text-[#A87850] font-sans leading-relaxed mb-4">
                 {selectedItem.description || 'Handcrafted fresh cake made with premium bakery ingredients and finest chocolate.'}
               </p>
 
               <button
                 onClick={() => setSelectedItem(null)}
-                className="w-full py-3 bg-[#6a2e16] hover:bg-[#522310] text-white font-bold text-xs rounded-none transition-colors uppercase tracking-wider"
+                className="w-full py-3 bg-[#6a2e16] hover:bg-[#522310] text-white font-bold text-xs rounded-none transition-colors uppercase tracking-wider font-serif"
               >
                 Close Details
               </button>
