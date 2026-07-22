@@ -32,10 +32,50 @@ const getCategoryIcon = (name) => {
   return <Utensils size={13} />
 }
 
+const DEMO_FOOD = [
+  {
+    _id: 'food-1',
+    name: 'Special Gourmet Western Burger',
+    price: 180,
+    category: { name: 'Burgers' },
+    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+    description: 'Juicy double patty with melted cheddar, caramelised onions & house special sauce.',
+  },
+  {
+    _id: 'food-2',
+    name: 'Woodfired Pepperoni Pizza',
+    price: 320,
+    category: { name: 'Pizzas' },
+    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80',
+    description: 'Crispy sourdough base with smoked pepperoni, mozzarella & fresh basil.',
+  },
+  {
+    _id: 'food-3',
+    name: 'Creamy Penne Alfredo Pasta',
+    price: 240,
+    category: { name: 'Pasta' },
+    imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3d5d6288924?auto=format&fit=crop&w=600&q=80',
+    description: 'Italian penne tossed in rich garlic parmesan cream sauce.',
+  },
+  {
+    _id: 'food-4',
+    name: 'Crispy Chicken Club Sandwich',
+    price: 160,
+    category: { name: 'Sandwiches' },
+    imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80',
+    description: 'Triple layered toasted bread with crispy fried chicken, lettuce & honey mustard.',
+  },
+]
+
 export default function ProductsSection() {
   const navigate = useNavigate()
-  const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState([])
+  const [products, setProducts] = useState(DEMO_FOOD)
+  const [categories, setCategories] = useState([
+    { _id: 'c1', name: 'Burgers' },
+    { _id: 'c2', name: 'Pizzas' },
+    { _id: 'c3', name: 'Pasta' },
+    { _id: 'c4', name: 'Sandwiches' },
+  ])
   const [active, setActive] = useState('All')
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -49,15 +89,20 @@ export default function ProductsSection() {
           axios.get(`${API}/api/products`),
           axios.get(`${API}/api/categories`),
         ])
-        setProducts(pRes.data)
-        setCategories(cRes.data)
+        if (pRes.data && pRes.data.length > 0) {
+          setProducts([...pRes.data, ...DEMO_FOOD])
+        }
+        if (cRes.data && cRes.data.length > 0) {
+          setCategories(cRes.data)
+        }
       } catch {
-        /* silent */
+        /* fallback to static demo items */
       } finally {
         setLoading(false)
       }
     })()
   }, [])
+
 
   const visibleCats = categories.filter(c => c.name.toLowerCase() !== 'cakes')
 
