@@ -18,11 +18,16 @@ app.use(express.json())
 
 // Healthcheck & root endpoints
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'Western Bakery API running ✅' }))
+app.get('/health', (req, res) => res.json({ status: 'ok', message: 'Western Bakery API running ✅' }))
 app.get('/', (req, res) => res.json({ message: 'Western Bakery API running ✅' }))
 
-// Routes
+// Routes (Supported for both direct and cPanel sub-path mounting)
 app.use('/api/categories', categoryRoutes)
+app.use('/categories', categoryRoutes)
+
 app.use('/api/products', productRoutes)
+app.use('/products', productRoutes)
+
 
 // Start Server immediately (Required for cPanel Phusion Passenger)
 const PORT = process.env.PORT || 5000
