@@ -75,19 +75,13 @@ export default function Cakes() {
     }
   }
 
-  const cakeCategories = [
-    { name: 'All', icon: '✨' },
-    { name: 'Wedding Cakes', icon: '💍' },
-    { name: 'Birthday Cakes', icon: '🎉' },
-    { name: 'Cupcakes', icon: '🧁' },
-    { name: 'Custom Cakes', icon: '🎨' },
-  ]
+  const cakeCategories = ['All', 'Wedding', 'Birthday', 'Cupcakes', 'Custom']
 
   const filtered = cakes.filter(c => {
     const matchSrch = c.name.toLowerCase().includes(search.toLowerCase())
     const matchCat = activeCategory === 'All' ||
       c.name.toLowerCase().includes(activeCategory.toLowerCase()) ||
-      c.category?.name === activeCategory
+      c.category?.name?.toLowerCase().includes(activeCategory.toLowerCase())
     return matchSrch && matchCat
   })
 
@@ -140,26 +134,26 @@ export default function Cakes() {
           )}
         </div>
 
-        {/* Pretty & Elegant Category Section */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-6">
+        {/* Pretty & Clean Category Section */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-6 justify-start sm:justify-center">
           {cakeCategories.map((cat) => {
-            const isActive = activeCategory === cat.name
+            const isActive = activeCategory === cat
             return (
               <button
-                key={cat.name}
-                onClick={() => setActiveCategory(cat.name)}
-                className={`py-2 px-4 text-xs font-semibold whitespace-nowrap rounded-none transition-all duration-200 flex items-center gap-1.5 border shrink-0 ${
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`py-2 px-5 text-xs font-semibold whitespace-nowrap rounded-none transition-all duration-200 border shrink-0 ${
                   isActive
                     ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
                     : 'bg-white text-[#5C3A21] border-[#EDE8DE] hover:border-[#C8A27C] hover:bg-[#FAF6F0]'
                 }`}
               >
-                <span className="text-xs">{cat.icon}</span>
-                <span>{cat.name}</span>
+                {cat}
               </button>
             )
           })}
         </div>
+
 
         {/* ── Cake Grid Section ── */}
         {loading && (
