@@ -13,11 +13,6 @@ const CUSTOM_STATIC_CAKES = [
   { _id: 'cust-5', imageUrl: '/custom/17.avif', category: { name: 'Custom' } },
   { _id: 'cust-6', imageUrl: '/custom/1000796798.jpg.jpeg', category: { name: 'Custom' } },
   { _id: 'cust-7', imageUrl: '/custom/1000805921.jpg.jpeg', category: { name: 'Custom' } },
-  { _id: 'cust-8', imageUrl: '/cake1.png', category: { name: 'Custom' } },
-  { _id: 'cust-9', imageUrl: '/cake2.png', category: { name: 'Custom' } },
-  { _id: 'cust-10', imageUrl: '/cake3.png', category: { name: 'Custom' } },
-  { _id: 'cust-11', imageUrl: '/cake4.png', category: { name: 'Custom' } },
-  { _id: 'cust-12', imageUrl: '/cake5.png', category: { name: 'Custom' } },
 ]
 
 const DEMO_MENU_CAKES = [
