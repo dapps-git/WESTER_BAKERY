@@ -203,14 +203,10 @@ export default function Cakes() {
               </div>
 
               {/* Bottom Details (Same typography as Food Menu) */}
-              <div className="p-3.5 sm:p-4 bg-white flex flex-col justify-between flex-1">
-                <h2 className="font-serif font-semibold text-sm sm:text-base text-[#3D2712] line-clamp-2 mb-1.5 leading-snug group-hover:text-[#6a2e16] transition-colors">
+              <div className="p-3.5 sm:p-4 bg-white flex flex-col justify-center flex-1">
+                <h2 className="font-serif font-semibold text-sm sm:text-base text-[#3D2712] line-clamp-2 leading-snug group-hover:text-[#6a2e16] transition-colors text-center">
                   {item.name}
                 </h2>
-
-                <div className="font-serif font-extrabold text-sm sm:text-base text-[#6a2e16] mt-auto pt-1">
-                  ₹{item.price}
-                </div>
               </div>
             </div>
           ))}
@@ -247,17 +243,15 @@ export default function Cakes() {
             </div>
 
             <div className="p-5">
-              <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="mb-2 text-center">
                 <h3 className="font-serif text-lg font-bold text-[#3D2712] leading-snug">
                   {selectedItem.name}
                 </h3>
-                <span className="font-serif text-xl font-extrabold text-[#6a2e16] whitespace-nowrap">
-                  ₹{selectedItem.price}
-                </span>
               </div>
-              <p className="text-xs text-[#A87850] font-sans leading-relaxed mb-4">
+              <p className="text-xs text-[#A87850] font-sans leading-relaxed mb-4 text-center">
                 {selectedItem.description || 'Handcrafted fresh cake made with premium bakery ingredients and finest chocolate.'}
               </p>
+
 
               <button
                 onClick={() => setSelectedItem(null)}
