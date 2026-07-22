@@ -2,17 +2,36 @@ import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Hero from '../components/Hero'
 
+// In-memory module flag to ensure splash screen only runs ONCE per session
+let hasLoadedOnce = false
+
 export default function Home() {
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => {
+    if (hasLoadedOnce || sessionStorage.getItem('hasSeenSplash')) {
+      return false
+    }
+    return true
+  })
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1800)
+    if (!loading) return
+
+    const t = setTimeout(() => {
+      hasLoadedOnce = true
+      try {
+        sessionStorage.setItem('hasSeenSplash', 'true')
+      } catch {
+        /* silent */
+      }
+      setLoading(false)
+    }, 1800)
+
     return () => clearTimeout(t)
-  }, [])
+  }, [loading])
 
   return (
     <>
-      {/* Loading Screen */}
+      {/* Loading Screen — Only shown on initial site visit */}
       <div className={`loading-screen ${loading ? '' : 'hidden'}`}>
         <div className="flex flex-col items-center gap-4">
           <p className="font-serif text-3xl font-light tracking-[0.3em] text-brown-700 animate-pulse">WESTERN</p>
