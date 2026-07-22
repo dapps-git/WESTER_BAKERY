@@ -211,23 +211,7 @@ export default function ProductsSection() {
       {/* ── Scrollable Content (padded below fixed navbar) ── */}
       <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '170px' : '148px' }}>
 
-        {/* Skeleton Loading List */}
-        {loading && (
-          <div className="flex flex-col gap-2">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="flex bg-white rounded-2xl overflow-hidden border border-gray-100 p-1.5 animate-pulse">
-                <div className="w-[145px] sm:w-[175px] h-[92px] sm:h-[105px] bg-gray-200 rounded-xl shrink-0" />
-                <div className="flex-1 flex flex-col justify-center px-4 gap-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-
-        {!loading && filtered.length === 0 && (
+        {filtered.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-400 text-sm font-medium">No menu items found.</p>
             {search && (
