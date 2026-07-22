@@ -134,7 +134,7 @@ export default function Cakes() {
           )}
         </div>
 
-        {/* Pretty & Clean Category Section */}
+        {/* Category Chips (Same style as Food Menu) */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-6 justify-start sm:justify-center">
           {cakeCategories.map((cat) => {
             const isActive = activeCategory === cat
@@ -142,10 +142,10 @@ export default function Cakes() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`py-2 px-5 text-xs font-semibold whitespace-nowrap rounded-none transition-all duration-200 border shrink-0 ${
+                className={`py-2 px-4.5 rounded-none text-center flex items-center justify-center cursor-pointer transition-all duration-200 shrink-0 font-sans text-xs font-semibold tracking-tight whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
-                    : 'bg-white text-[#5C3A21] border-[#EDE8DE] hover:border-[#C8A27C] hover:bg-[#FAF6F0]'
+                    ? 'bg-[#6a2e16] text-white shadow-sm border border-[#6a2e16]'
+                    : 'bg-white text-gray-700 border border-[#EDE8DE] hover:border-[#C8A27C] hover:bg-[#FAF6F0] shadow-[0_1px_4px_rgba(0,0,0,0.04)]'
                 }`}
               >
                 {cat}
@@ -153,6 +153,7 @@ export default function Cakes() {
             )
           })}
         </div>
+
 
 
         {/* ── Cake Grid Section ── */}
