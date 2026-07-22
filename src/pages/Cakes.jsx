@@ -8,33 +8,41 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const DEMO_CAKES = [
   {
     _id: 'demo-1',
-    name: 'Candyland Carnival Cake',
-    category: { name: 'Birthday Cakes' },
-    imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
-    description: 'Decadent dark chocolate layers dripping with rich ganache, topped with fresh strawberries.',
+    name: 'Rainbow Unicorn Birthday Cake',
+    category: { name: 'Birthday' },
+    imageUrl: '/cake1.png',
+    description: 'Beautiful 2-tier rainbow unicorn birthday cake with colorful sphere accents and gold Happy Birthday topper.',
   },
   {
     _id: 'demo-2',
-    name: 'Rainbow Burst Gem Cake',
-    category: { name: 'Custom Cakes' },
-    imageUrl: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
-    description: 'Vibrant pink cream layers topped with sprinkles and a mini waffle cone accent.',
+    name: 'Spiderman Theme Birthday Cake',
+    category: { name: 'Birthday' },
+    imageUrl: '/cake2.png',
+    description: 'Exciting Spiderman birthday cake with orange spiderweb top and city skyline border.',
   },
   {
     _id: 'demo-3',
-    name: 'Cherry Blossom Cake',
-    category: { name: 'Birthday Cakes' },
-    imageUrl: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
-    description: 'Delicate chocolate wafer crust filled with velvety cocoa sponge and festive sprinkles.',
+    name: 'Square Dark Chocolate Truffle Cake',
+    category: { name: 'Custom' },
+    imageUrl: '/cake3.png',
+    description: 'Decadent square chocolate truffle cake with mirror glaze finish, chocolate shards, and almond chip borders.',
   },
   {
     _id: 'demo-4',
-    name: 'Cookie Dough Fudge Cake',
-    category: { name: 'Wedding Cakes' },
-    imageUrl: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&w=800&q=80',
-    description: 'Creamy chocolate rosettes layered over rich sponge cake with rainbow sugar crystals.',
+    name: 'Ariel Princess Pink Birthday Cake',
+    category: { name: 'Birthday' },
+    imageUrl: '/cake4.png',
+    description: 'Lovely Ariel princess theme 1st birthday cake with pink gradient frosting and 3D paper butterflies.',
+  },
+  {
+    _id: 'demo-5',
+    name: 'Princess Theme 2-Tier Butterfly Cake',
+    category: { name: 'Custom' },
+    imageUrl: '/cake5.png',
+    description: 'Elegant 2-tier princess cake decorated with pearl accents, gold and silver spheres, and butterflies.',
   },
 ]
+
 
 export default function Cakes() {
   const navigate = useNavigate()
