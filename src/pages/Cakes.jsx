@@ -7,42 +7,204 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const DEMO_CAKES = [
   {
-    _id: 'demo-1',
+    _id: 'c-1',
+    name: 'Black Forest Cake',
+    category: { name: 'Chocolate' },
+    imageUrl: '/cakes/blackforest.png',
+    description: 'Classic moist chocolate sponge layered with fresh whipped cream and juicy cherries, topped with dark chocolate curls.',
+    prices: [
+      { weight: '500g', price: 300 },
+      { weight: '1 kg', price: 600 },
+    ],
+  },
+  {
+    _id: 'c-2',
+    name: 'White Forest Cake',
+    category: { name: 'Vanilla' },
+    imageUrl: '/cakes/whiteforest.png',
+    description: 'Fluffy vanilla sponge cake layered with white chocolate shavings, red cherries, and velvety whipped cream.',
+    prices: [
+      { weight: '500g', price: 300 },
+      { weight: '1 kg', price: 600 },
+    ],
+  },
+  {
+    _id: 'c-3',
+    name: 'Oreo Cream Cake',
+    category: { name: 'Chocolate' },
+    imageUrl: '/cakes/oreocake.jpeg',
+    description: 'Decadent chocolate sponge layered with crushed Oreo cookie cream and topped with whole Oreo biscuits.',
+    prices: [
+      { weight: '500g', price: 600 },
+    ],
+  },
+  {
+    _id: 'c-4',
+    name: 'Ferrero Rocher Cake',
+    category: { name: 'Premium' },
+    imageUrl: '/cakes/ferroro.jpeg',
+    description: 'Luxurious hazelnut chocolate cake loaded with real Ferrero Rocher chocolates, Nutella glaze, and roasted hazelnut crunch.',
+    prices: [
+      { weight: '1 kg', price: 1450 },
+    ],
+  },
+  {
+    _id: 'c-5',
+    name: 'Pistachio Chocolate Cake',
+    category: { name: 'Premium' },
+    imageUrl: '/cakes/pistachiocake.jpeg',
+    description: 'Rich dark chocolate cake infused with creamy pistachio mousse and crushed roasted pistachios.',
+    prices: [
+      { weight: '1 kg', price: 1400 },
+    ],
+  },
+  {
+    _id: 'c-6',
+    name: 'Tender Coconut Cake',
+    category: { name: 'Specialty' },
+    imageUrl: '/cakes/tendercoconutcake.jpeg',
+    description: 'Fresh and light coconut sponge infused with real tender coconut pulp and soft vanilla cream.',
+    prices: [
+      { weight: '1 kg', price: 1400 },
+    ],
+  },
+  {
+    _id: 'c-7',
+    name: 'Dutch Chocolate Cake',
+    category: { name: 'Chocolate' },
+    imageUrl: '/cakes/dutchchoclatecake.jpeg',
+    description: 'Deep, rich cocoa layers made with premium Dutch dark cocoa and silky chocolate fudge frosting.',
+    prices: [
+      { weight: '1 kg', price: 1000 },
+    ],
+  },
+  {
+    _id: 'c-8',
+    name: 'Choco Butter Cake',
+    category: { name: 'Chocolate' },
+    imageUrl: '/cakes/chocobutterctc.jpeg',
+    description: 'Moist golden butter cake layered with rich chocolate buttercream and chocolate drippings.',
+    prices: [
+      { weight: '1 kg', price: 1100 },
+    ],
+  },
+  {
+    _id: 'c-9',
+    name: 'Chocolate Coffee Cake',
+    category: { name: 'Chocolate' },
+    imageUrl: '/cakes/chocolatecoffecake.jpeg',
+    description: 'Perfect harmony of espresso coffee-infused sponge and rich dark chocolate ganache.',
+    prices: [
+      { weight: '1 kg', price: 900 },
+    ],
+  },
+  {
+    _id: 'c-10',
+    name: 'Caramel Nuts Cake',
+    category: { name: 'Nuts & Caramel' },
+    imageUrl: '/cakes/caramelnuts.jpeg',
+    description: 'Butterscotch sponge layered with golden salted caramel sauce and crunchy roasted cashews and almonds.',
+    prices: [
+      { weight: '500g', price: 480 },
+      { weight: '1 kg', price: 900 },
+    ],
+  },
+  {
+    _id: 'c-11',
+    name: 'Passion Fruit Cake',
+    category: { name: 'Fruit' },
+    imageUrl: '/cakes/passionfruitcake.jpeg',
+    description: 'Refreshing tropical passion fruit curd layered between soft vanilla sponges and light cream.',
+    prices: [
+      { weight: '1 kg', price: 800 },
+    ],
+  },
+  {
+    _id: 'c-12',
+    name: 'Spanish Delight Cake',
+    category: { name: 'Specialty' },
+    imageUrl: '/cakes/carml.png',
+    description: 'Famous Spanish delight cake layered with rich custard, chocolate sauce, and toasted nuts.',
+    prices: [
+      { weight: '500g', price: 400 },
+      { weight: '1 kg', price: 780 },
+    ],
+  },
+  {
+    _id: 'c-13',
+    name: 'Pineapple Delight Cake',
+    category: { name: 'Fruit' },
+    imageUrl: '/cakes/pineaappledelight.jpg',
+    description: 'Light, juicy vanilla cake filled with fresh chopped pineapples and sweet pineapple glaze.',
+    prices: [
+      { weight: '500g', price: 480 },
+      { weight: '1 kg', price: 780 },
+    ],
+  },
+  {
+    _id: 'c-14',
+    name: 'Blueberry Cake',
+    category: { name: 'Fruit' },
+    imageUrl: '/cakes/blueberry.png',
+    description: 'Soft vanilla sponge layered with real blueberry compote and light whipped cream.',
+    prices: [
+      { weight: '500g', price: 400 },
+      { weight: '1 kg', price: 780 },
+    ],
+  },
+  {
+    _id: 'c-15',
+    name: 'Red Velvet Cake',
+    category: { name: 'Red Velvet' },
+    imageUrl: '/cakes/reveltv.jpg',
+    description: 'Classic crimson red velvet cake with velvety cream cheese frosting.',
+    prices: [
+      { weight: '500g', price: 400 },
+      { weight: '1 kg', price: 780 },
+    ],
+  },
+  {
+    _id: 'c-16',
+    name: 'Honey Almond Cake',
+    category: { name: 'Nuts & Caramel' },
+    imageUrl: '/cakes/honeyalmoncake.jpeg',
+    description: 'Sweet honey-infused cake encrusted with roasted sliced almonds and honey glaze.',
+    prices: [
+      { weight: '1 kg', price: 950 },
+    ],
+  },
+  {
+    _id: 'c-17',
+    name: 'KitKat Chocolate Cake',
+    category: { name: 'Chocolate' },
+    imageUrl: '/cakes/kitkatcake.jpeg',
+    description: 'Chocolate cake surrounded by crispy KitKat bars and topped with colorful chocolate gems.',
+    prices: [
+      { weight: '1 kg', price: 1200 },
+    ],
+  },
+  {
+    _id: 'c-18',
+    name: 'Strawberry Delight Cake',
+    category: { name: 'Fruit' },
+    imageUrl: '/cakes/strwaberrydelight.jpeg',
+    description: 'Fresh strawberry compote layered with fluffy vanilla sponge and whipped cream.',
+    prices: [
+      { weight: '500g', price: 400 },
+      { weight: '1 kg', price: 780 },
+    ],
+  },
+  {
+    _id: 'c-19',
     name: 'Rainbow Unicorn Birthday Cake',
-    category: { name: 'Birthday' },
+    category: { name: 'Custom' },
     imageUrl: '/cake1.png',
-    description: 'Beautiful 2-tier rainbow unicorn birthday cake with colorful sphere accents and gold Happy Birthday topper.',
-  },
-  {
-    _id: 'demo-2',
-    name: 'Spiderman Theme Birthday Cake',
-    category: { name: 'Birthday' },
-    imageUrl: '/cake2.png',
-    description: 'Exciting Spiderman birthday cake with orange spiderweb top and city skyline border.',
-  },
-  {
-    _id: 'demo-3',
-    name: 'Square Dark Chocolate Truffle Cake',
-    category: { name: 'Custom' },
-    imageUrl: '/cake3.png',
-    description: 'Decadent square chocolate truffle cake with mirror glaze finish, chocolate shards, and almond chip borders.',
-  },
-  {
-    _id: 'demo-4',
-    name: 'Ariel Princess Pink Birthday Cake',
-    category: { name: 'Birthday' },
-    imageUrl: '/cake4.png',
-    description: 'Lovely Ariel princess theme 1st birthday cake with pink gradient frosting and 3D paper butterflies.',
-  },
-  {
-    _id: 'demo-5',
-    name: 'Princess Theme 2-Tier Butterfly Cake',
-    category: { name: 'Custom' },
-    imageUrl: '/cake5.png',
-    description: 'Elegant 2-tier princess cake decorated with pearl accents, gold and silver spheres, and butterflies.',
+    description: 'Custom 2-tier rainbow unicorn birthday cake with colorful sphere accents and golden Happy Birthday topper.',
+    prices: [
+      { weight: '1 kg', price: 1500 },
+    ],
   },
 ]
-
 
 export default function Cakes() {
   const navigate = useNavigate()
@@ -52,6 +214,7 @@ export default function Cakes() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState('All')
   const [selectedItem, setSelectedItem] = useState(null)
+  const [selectedWeightIdx, setSelectedWeightIdx] = useState(0)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -60,7 +223,12 @@ export default function Cakes() {
         const pRes = await axios.get(`${API}/api/products`)
         const apiCakes = pRes.data.filter(p => p.category?.name?.toLowerCase() === 'cakes')
         if (apiCakes && apiCakes.length > 0) {
-          setCakes([...apiCakes, ...DEMO_CAKES])
+          // Merge API cakes with menu cakes
+          const formattedApiCakes = apiCakes.map(c => ({
+            ...c,
+            prices: c.prices || [{ weight: '1 kg', price: c.price || 600 }]
+          }))
+          setCakes([...formattedApiCakes, ...DEMO_CAKES])
         } else {
           setCakes(DEMO_CAKES)
         }
@@ -80,7 +248,7 @@ export default function Cakes() {
     }
   }
 
-  const cakeCategories = ['All', 'Wedding', 'Birthday', 'Cupcakes', 'Custom']
+  const cakeCategories = ['All', 'Chocolate', 'Fruit', 'Premium', 'Specialty', 'Red Velvet', 'Nuts & Caramel', 'Custom']
 
   const filtered = cakes.filter(c => {
     const matchSrch = c.name.toLowerCase().includes(search.toLowerCase())
@@ -89,6 +257,11 @@ export default function Cakes() {
       c.category?.name?.toLowerCase().includes(activeCategory.toLowerCase())
     return matchSrch && matchCat
   })
+
+  const openCakeModal = (item) => {
+    setSelectedItem(item)
+    setSelectedWeightIdx(0)
+  }
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen font-sans text-gray-900 overflow-hidden">
@@ -203,52 +376,69 @@ export default function Cakes() {
           </div>
         )}
 
-
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
-          {filtered.map((item, index) => (
-            <div
-              key={item._id || index}
-              onClick={() => setSelectedItem(item)}
-              className="bg-white border border-[#EDE8DE] rounded-none overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-            >
-              {/* Top Image Container */}
-              <div className="w-full aspect-[4/3] sm:aspect-square bg-[#F5EDE3] overflow-hidden relative">
-                {item.imageUrl ? (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80'
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl text-[#C8A27C]">🎂</div>
-                )}
-              </div>
+          {filtered.map((item, index) => {
+            const minPrice = item.prices ? Math.min(...item.prices.map(p => p.price)) : item.price
+            const weightBadge = item.prices ? item.prices.map(p => p.weight).join(' / ') : ''
 
-              {/* Bottom Details */}
-              <div className="p-3.5 sm:p-4 bg-white flex flex-col justify-center flex-1">
-                <h2 className="font-serif font-semibold text-sm sm:text-base text-[#3D2712] line-clamp-2 leading-snug group-hover:text-[#6a2e16] transition-colors text-center">
-                  {item.name}
-                </h2>
+            return (
+              <div
+                key={item._id || index}
+                onClick={() => openCakeModal(item)}
+                className="bg-white border border-[#EDE8DE] rounded-none overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+              >
+                {/* Top Image Container */}
+                <div className="w-full aspect-[4/3] sm:aspect-square bg-[#F5EDE3] overflow-hidden relative">
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80'
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl text-[#C8A27C]">🎂</div>
+                  )}
+
+                  {/* Weight badge overlay */}
+                  {weightBadge && (
+                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none">
+                      {weightBadge}
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom Details */}
+                <div className="p-3 sm:p-3.5 bg-white flex flex-col justify-between flex-1 text-center">
+                  <h2 className="font-serif font-semibold text-xs sm:text-sm text-[#3D2712] line-clamp-2 leading-snug group-hover:text-[#6a2e16] transition-colors mb-1">
+                    {item.name}
+                  </h2>
+                  {minPrice && (
+                    <div className="font-serif font-extrabold text-xs sm:text-sm text-[#6a2e16] mt-auto">
+                      ₹{minPrice} {item.prices?.length > 1 ? <span className="text-[10px] text-gray-500 font-sans font-normal">(500g)</span> : ''}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
-      {/* ── Cake Detail Modal ── */}
+      {/* ── Gorgeous Interactive Cake Detail Modal ── */}
       {selectedItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(30,10,5,0.6)', backdropFilter: 'blur(4px)' }}
+          style={{ background: 'rgba(30,10,5,0.65)', backdropFilter: 'blur(4px)' }}
           onClick={() => setSelectedItem(null)}
         >
           <div
             className="bg-white w-full max-w-sm rounded-none border border-[#EDE8DE] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           >
+            {/* Full Image */}
             <div className="w-full h-64 bg-[#F5EDE3] relative">
               {selectedItem.imageUrl ? (
                 <img
@@ -267,21 +457,51 @@ export default function Cakes() {
               </button>
             </div>
 
+            {/* Modal Body */}
             <div className="p-5">
-              <div className="mb-2 text-center">
-                <h3 className="font-serif text-lg font-bold text-[#3D2712] leading-snug">
+              <div className="text-center mb-3">
+                <span className="text-[10px] font-bold text-[#8C6239] uppercase tracking-widest bg-[#FAF6F0] px-2 py-0.5 border border-[#EDE8DE]">
+                  {selectedItem.category?.name || 'Fresh Baked Cake'}
+                </span>
+                <h3 className="font-serif text-lg font-bold text-[#3D2712] leading-snug mt-1.5">
                   {selectedItem.name}
                 </h3>
               </div>
-              <p className="text-xs text-[#A87850] font-sans leading-relaxed mb-4 text-center">
-                {selectedItem.description || 'Handcrafted fresh cake made with premium bakery ingredients and finest chocolate.'}
+
+              <p className="text-xs text-[#666666] font-sans leading-relaxed mb-4 text-center">
+                {selectedItem.description}
               </p>
+
+              {/* Weight & Price Selector */}
+              {selectedItem.prices && selectedItem.prices.length > 0 && (
+                <div className="mb-5 bg-[#FAF8F5] p-3 border border-[#EDE8DE] rounded-none">
+                  <p className="text-[11px] font-bold text-[#5C3A21] mb-2 text-center uppercase tracking-wider">
+                    Select Weight & Price:
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    {selectedItem.prices.map((pOpt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedWeightIdx(idx)}
+                        className={`flex-1 py-2 px-3 text-xs font-bold rounded-none border transition-all ${
+                          selectedWeightIdx === idx
+                            ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
+                            : 'bg-white text-[#3D2712] border-[#EDE8DE] hover:border-[#C8A27C]'
+                        }`}
+                      >
+                        <span className="block text-[10px] opacity-80">{pOpt.weight}</span>
+                        <span className="text-sm font-serif">₹{pOpt.price}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={() => setSelectedItem(null)}
-                className="w-full py-3 bg-[#6a2e16] hover:bg-[#522310] text-white font-bold text-xs rounded-none transition-colors uppercase tracking-wider font-serif"
+                className="w-full py-3 bg-[#6a2e16] hover:bg-[#522310] text-white font-bold text-xs rounded-none transition-colors uppercase tracking-wider font-serif shadow-sm"
               >
-                Close Details
+                Close View
               </button>
             </div>
           </div>
