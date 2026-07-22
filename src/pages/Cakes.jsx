@@ -286,11 +286,24 @@ export default function Cakes() {
               <h1 className="font-serif italic font-bold text-xl sm:text-2xl text-[#6a2e16] tracking-wider leading-none">
                 Cake Menu
               </h1>
-              <div className="flex items-center gap-1.5 mt-0.5">
+              <div className="flex items-center gap-1.5 mt-0.5 mb-1">
                 <div className="h-px w-5 bg-[#C8A27C]" />
                 <span className="text-[#8C6239] text-[9px] font-serif">✦</span>
                 <div className="h-px w-5 bg-[#C8A27C]" />
               </div>
+
+              {/* View Customized Cakes Button */}
+              <button
+                onClick={() => setActiveCategory('Custom')}
+                className={`py-0.5 px-2.5 text-[10px] font-bold rounded-full transition-all duration-200 border flex items-center gap-1 ${
+                  activeCategory === 'Custom'
+                    ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
+                    : 'bg-[#FAF6F0] text-[#6a2e16] border-[#C8A27C] hover:bg-[#6a2e16] hover:text-white'
+                }`}
+              >
+                <span>✨</span>
+                <span>View Customized Cakes</span>
+              </button>
             </div>
 
             <button
@@ -349,7 +362,7 @@ export default function Cakes() {
       </div>
 
       {/* ── Scrollable Content (padded below fixed navbar) ── */}
-      <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '168px' : '146px' }}>
+      <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '192px' : '170px' }}>
 
         {filtered.length === 0 && (
           <div className="text-center py-16 bg-white border border-[#EDE8DE] p-8 rounded-none">
