@@ -351,21 +351,7 @@ export default function Cakes() {
       {/* ── Scrollable Content (padded below fixed navbar) ── */}
       <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '168px' : '146px' }}>
 
-        {/* Skeleton Loading Grid */}
-        {loading && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-white border border-[#EDE8DE] rounded-none overflow-hidden flex flex-col justify-between animate-pulse">
-                <div className="w-full aspect-[4/3] sm:aspect-square bg-gray-200/80" />
-                <div className="p-3.5 sm:p-4 bg-white flex flex-col justify-center items-center gap-2">
-                  <div className="h-4 bg-gray-200/80 rounded-none w-3/4" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && filtered.length === 0 && (
+        {filtered.length === 0 && (
           <div className="text-center py-16 bg-white border border-[#EDE8DE] p-8 rounded-none">
             <p className="text-[#A87850] text-sm font-medium">No cakes found matching your search.</p>
             {search && (
