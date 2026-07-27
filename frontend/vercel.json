@@ -1,8 +1,8 @@
 {
   "redirects": [
     {
-      "source": "/",
-      "destination": "/admin",
+      "source": "/(.*)",
+      "destination": "https://www.westernbakery.in/admin",
       "permanent": true,
       "has": [
         {
