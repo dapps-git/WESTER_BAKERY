@@ -3,13 +3,30 @@ import Category from '../models/Category.js'
 
 const router = express.Router()
 
+const DEFAULT_CATEGORIES = [
+  { _id: 'cat-1', name: 'Snacks', icon: '🥐' },
+  { _id: 'cat-2', name: 'Sandwich', icon: '🥪' },
+  { _id: 'cat-3', name: 'Burger', icon: '🍔' },
+  { _id: 'cat-4', name: 'Fried Chicken', icon: '🍗' },
+  { _id: 'cat-5', name: 'Shawarma', icon: '🥙' },
+  { _id: 'cat-6', name: 'Alfham & Shawai', icon: '🔥' },
+  { _id: 'cat-7', name: 'Pizza', icon: '🍕' },
+  { _id: 'cat-8', name: 'Fresh Juices', icon: '🧃' },
+  { _id: 'cat-9', name: 'Lime & Mojitos', icon: '🥤' },
+  { _id: 'cat-10', name: 'Tea & Coffee', icon: '☕' },
+]
+
 // GET all categories
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find().sort({ createdAt: 1 })
-    res.json(categories)
+    if (categories && categories.length > 0) {
+      return res.json(categories)
+    }
+    res.json(DEFAULT_CATEGORIES)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('Category GET error:', err.message)
+    res.json(DEFAULT_CATEGORIES)
   }
 })
 

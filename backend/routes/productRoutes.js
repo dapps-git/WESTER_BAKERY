@@ -74,7 +74,8 @@ router.get('/', async (req, res) => {
     const products = await Product.find(filter).populate('category').sort({ createdAt: -1 })
     res.json(products)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('Products GET error:', err.message)
+    res.json([])
   }
 })
 

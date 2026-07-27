@@ -30,7 +30,8 @@ router.get('/', async (req, res) => {
     const customCakes = await CustomCake.find().sort({ createdAt: -1 })
     res.json(customCakes)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('CustomCakes GET error:', err.message)
+    res.json([])
   }
 })
 

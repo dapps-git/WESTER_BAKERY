@@ -55,7 +55,8 @@ router.get('/', async (req, res) => {
     const cakes = await Cake.find().sort({ createdAt: -1 })
     res.json(cakes)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('Cakes GET error:', err.message)
+    res.json([])
   }
 })
 
