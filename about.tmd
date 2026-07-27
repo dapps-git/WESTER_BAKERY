@@ -1,0 +1,153 @@
+Bakery Website Development Requirements
+
+Project Overview
+
+We are developing a premium Western bakery website with a modern, elegant, and minimal design. The overall theme should use off-white and brown colors to create a luxurious bakery experience. I will provide the logo, design references, Cloudinary credentials, MongoDB credentials, and other required assets.
+
+⸻
+
+Design & UI
+
+* Build a premium, modern, and responsive website.
+* Follow the reference website as closely as possible in terms of:
+    * Homepage layout
+    * Loading screen
+    * Animations
+    * Overall premium feel
+* Use an off-white + brown color palette.
+* Maintain consistent typography, spacing, and smooth transitions.
+* Ensure excellent mobile, tablet, and desktop responsiveness.
+
+⸻
+
+Backend (Admin Panel)
+
+The admin panel should allow complete management of products.
+
+Each product should include:
+
+* Product Name
+* Category
+* Price
+* Product Image (uploaded to Cloudinary)
+
+Category Management
+
+The admin should be able to:
+
+* Create categories
+* Edit categories
+* Delete categories
+* Assign a category while creating a product
+
+Example categories:
+
+* Cakes
+* Birthday Cakes
+* Wedding Cakes
+* Pastries
+* Breads
+* Cookies
+* Shawarma
+* Biryani
+* Snacks
+* Beverages
+
+⸻
+
+Product Management
+
+Admin features:
+
+* Add Product
+* Edit Product
+* Delete Product
+* Upload images to Cloudinary
+* Store image URLs in MongoDB
+* Display products dynamically on the frontend
+
+⸻
+
+Homepage
+
+The homepage should include:
+
+* Premium hero section
+* Loading animation
+* Featured bakery products
+* Shawarma section
+* Biryani section
+* Popular products
+* About Bakery
+* Why Choose Us
+* Customer Reviews
+* Gallery
+* Contact section
+* Beautiful footer
+
+⸻
+
+Cake Collection Page
+
+Create a dedicated cake collection section.
+
+Instead of a large button, display elegant text such as:
+
+“View All Cake Collections →”
+
+This should navigate users to the complete cake collection page.
+
+All cake products will be managed dynamically from the admin panel.
+
+⸻
+
+Database
+
+Use MongoDB.
+
+I will provide:
+
+* MongoDB connection string
+* Database credentials
+
+⸻
+
+Image Storage
+
+Use Cloudinary for all product images.
+
+I will provide:
+
+* Cloudinary Cloud Name
+* API Key
+* API Secret
+
+Images should be uploaded directly to Cloudinary, and only the image URL should be stored in MongoDB.
+
+⸻
+
+Technology Stack
+
+* React.js (Frontend)
+* Node.js
+* Express.js
+* MongoDB
+* Cloudinary
+* Tailwind CSS (preferred) or another modern styling framework
+
+⸻
+
+Additional Requirements
+
+* Premium animations
+* Fast loading
+* Responsive design
+* Clean code structure
+* Dynamic content throughout
+* Easy-to-manage admin dashboard
+* Modern UI/UX following the provided reference
+
+Once I share the logo, reference website, Cloudinary credentials, and MongoDB credentials, the project should be implemented according to these requirements while maintaining a premium Western bakery aesthetic.
+
+and kindly choose hero.png for hero section and after scrolling hero show all products like products.png and we need seprt section for cakes like cake.png okey
+use light weight font and make it premium..i wll photos dynamclly okey..make sure we need catgeryd that also i wll from backnd..place 8 photo in onw row in lap view and 6 in tab view and 4 in mobiel view okey with smooth animation i mean for hero img oke

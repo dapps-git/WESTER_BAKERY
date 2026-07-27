@@ -1,0 +1,145 @@
+import express from 'express'
+import multer from 'multer'
+import sharp from 'sharp'
+import { v2 as cloudinary } from 'cloudinary'
+import { Readable } from 'stream'
+import Cake from '../models/Cake.js'
+
+const router = express.Router()
+
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+const upload = multer({ storage: multer.memoryStorage() })
+
+// Helper: Compress to WebP then upload to Cloudinary
+const uploadToCloudinary = (buffer, folder = 'westernbakery/cakes') => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const webpBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder, resource_type: 'image', format: 'webp' },
+        (error, result) => {
+          if (error) return reject(error)
+          resolve(result.secure_url)
+        }
+      )
+      const readable = new Readable()
+      readable.push(webpBuffer)
+      readable.push(null)
+      readable.pipe(uploadStream)
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+const deleteFromCloudinary = async (imageUrl) => {
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) return
+  try {
+    const parts = imageUrl.split('/')
+    const fileWithExt = parts[parts.length - 1]
+    const file = fileWithExt.split('.')[0]
+    const folder = parts[parts.length - 2]
+    await cloudinary.uploader.destroy(`${folder}/${file}`)
+  } catch {}
+}
+
+// GET all cakes
+router.get('/', async (req, res) => {
+  try {
+    const cakes = await Cake.find().sort({ createdAt: -1 })
+    res.json(cakes)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// GET single cake
+router.get('/:id', async (req, res) => {
+  try {
+    const cake = await Cake.findById(req.params.id)
+    if (!cake) return res.status(404).json({ error: 'Cake not found' })
+    res.json(cake)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// POST create cake → WebP → Cloudinary
+router.post('/', upload.single('image'), async (req, res) => {
+  try {
+    let imageUrl = req.body.imageUrl || ''
+    if (req.file) {
+      imageUrl = await uploadToCloudinary(req.file.buffer, 'westernbakery/cakes')
+    }
+
+    let prices = []
+    if (req.body.prices) {
+      prices = typeof req.body.prices === 'string' ? JSON.parse(req.body.prices) : req.body.prices
+    } else if (req.body.price) {
+      prices = [{ weight: req.body.weight || '1 kg', price: Number(req.body.price) }]
+    }
+
+    const cake = new Cake({
+      name: req.body.name,
+      category: req.body.category || 'Chocolate',
+      description: req.body.description || '',
+      prices,
+      imageUrl,
+    })
+
+    await cake.save()
+    res.status(201).json(cake)
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+})
+
+// PUT update cake
+router.put('/:id', upload.single('image'), async (req, res) => {
+  try {
+    const cake = await Cake.findById(req.params.id)
+    if (!cake) return res.status(404).json({ error: 'Cake not found' })
+
+    if (req.file) {
+      await deleteFromCloudinary(cake.imageUrl)
+      cake.imageUrl = await uploadToCloudinary(req.file.buffer, 'westernbakery/cakes')
+    } else if (req.body.imageUrl) {
+      cake.imageUrl = req.body.imageUrl
+    }
+
+    if (req.body.name) cake.name = req.body.name
+    if (req.body.category) cake.category = req.body.category
+    if (req.body.description !== undefined) cake.description = req.body.description
+    if (req.body.prices) {
+      cake.prices = typeof req.body.prices === 'string' ? JSON.parse(req.body.prices) : req.body.prices
+    } else if (req.body.price) {
+      cake.prices = [{ weight: req.body.weight || '1 kg', price: Number(req.body.price) }]
+    }
+
+    await cake.save()
+    res.json(cake)
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+})
+
+// DELETE cake + Cloudinary image
+router.delete('/:id', async (req, res) => {
+  try {
+    const cake = await Cake.findById(req.params.id)
+    if (!cake) return res.status(404).json({ error: 'Cake not found' })
+    await deleteFromCloudinary(cake.imageUrl)
+    await Cake.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Cake deleted' })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+export default router
