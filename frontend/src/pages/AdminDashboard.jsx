@@ -803,7 +803,7 @@ export default function AdminDashboard() {
                 >
                   <option value="">Select category</option>
                   {categories.map((c) => (
-                    <option key={c._id} value={c._id}>{c.icon} {c.name}</option>
+                    <option key={c._id} value={c._id?.startsWith('cat-') ? c.name : c._id}>{c.icon} {c.name}</option>
                   ))}
                 </select>
               </div>
