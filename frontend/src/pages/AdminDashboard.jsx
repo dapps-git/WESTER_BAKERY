@@ -35,6 +35,19 @@ const CAKE_CATEGORIES = [
   'Nuts & Caramel',
 ]
 
+const DEFAULT_FOOD_CATEGORIES = [
+  { _id: 'cat-1', name: 'Snacks', icon: '🥐' },
+  { _id: 'cat-2', name: 'Sandwich', icon: '🥪' },
+  { _id: 'cat-3', name: 'Burger', icon: '🍔' },
+  { _id: 'cat-4', name: 'Fried Chicken', icon: '🍗' },
+  { _id: 'cat-5', name: 'Shawarma', icon: '🥙' },
+  { _id: 'cat-6', name: 'Alfham & Shawai', icon: '🔥' },
+  { _id: 'cat-7', name: 'Pizza', icon: '🍕' },
+  { _id: 'cat-8', name: 'Fresh Juices', icon: '🧃' },
+  { _id: 'cat-9', name: 'Lime & Mojitos', icon: '🥤' },
+  { _id: 'cat-10', name: 'Tea & Coffee', icon: '☕' },
+]
+
 export default function AdminDashboard() {
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -44,6 +57,7 @@ export default function AdminDashboard() {
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   // Tabs: 'products' | 'cakes' | 'categories'
   const [tab, setTab] = useState('products')
@@ -53,7 +67,7 @@ export default function AdminDashboard() {
 
   // Products & Categories state
   const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState(DEFAULT_FOOD_CATEGORIES)
   const [productForm, setProductForm] = useState({ name: '', category: '', price: '', image: null })
   const [editingProduct, setEditingProduct] = useState(null)
   const [productModal, setProductModal] = useState(false)
@@ -105,7 +119,7 @@ export default function AdminDashboard() {
       ])
 
       if (p.status === 'fulfilled') setProducts(p.value.data)
-      if (c.status === 'fulfilled') setCategories(c.value.data)
+      if (c.status === 'fulfilled' && c.value.data?.length > 0) setCategories(c.value.data)
       if (ck.status === 'fulfilled') setCakes(ck.value.data)
       if (cc.status === 'fulfilled') setCustomCakes(cc.value.data)
     } catch {
@@ -189,6 +203,7 @@ export default function AdminDashboard() {
     if (!productForm.price) return notify('Price is required', false)
     if (!editingProduct && !productForm.image) return notify('Please upload a product image', false)
 
+    setSubmitting(true)
     try {
       const fd = new FormData()
       fd.append('name', productForm.name)
@@ -205,8 +220,10 @@ export default function AdminDashboard() {
       }
       setProductModal(false)
       loadData()
-    } catch {
-      notify('Error saving product', false)
+    } catch (err) {
+      notify(err.response?.data?.error || 'Error saving product', false)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -257,6 +274,7 @@ export default function AdminDashboard() {
     if (!cakeForm.price500g && !cakeForm.price1kg) return notify('Please enter at least one price (500g or 1kg)', false)
     if (!editingCake && !cakeForm.image) return notify('Please upload a cake image', false)
 
+    setSubmitting(true)
     try {
       const prices = []
       if (cakeForm.price500g) prices.push({ weight: '500g', price: Number(cakeForm.price500g) })
@@ -279,8 +297,10 @@ export default function AdminDashboard() {
       }
       setCakeModal(false)
       loadData()
-    } catch {
-      notify('Error saving cake', false)
+    } catch (err) {
+      notify(err.response?.data?.error || 'Error saving cake', false)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -303,12 +323,13 @@ export default function AdminDashboard() {
   }
 
   const submitCustomCake = async () => {
-    try {
-      if (!customForm.image) {
-        notify('Please select an image for custom cake', false)
-        return
-      }
+    if (!customForm.image) {
+      notify('Please select an image for custom cake', false)
+      return
+    }
 
+    setSubmitting(true)
+    try {
       const fd = new FormData()
       fd.append('name', customForm.name || 'Custom Cake Design')
       fd.append('image', customForm.image)
@@ -317,8 +338,10 @@ export default function AdminDashboard() {
       notify('Custom cake photo added to gallery!')
       setCustomModal(false)
       loadData()
-    } catch {
-      notify('Error saving custom cake design', false)
+    } catch (err) {
+      notify(err.response?.data?.error || 'Error saving custom cake design', false)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -826,9 +849,9 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setProductModal(false)} className="flex-1 py-2.5 border border-gray-200 rounded-2xl font-bold text-xs text-gray-600">Cancel</button>
-              <button onClick={submitProduct} className="flex-1 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310]">
-                {editingProduct ? 'Update Product' : 'Add Product'}
+              <button onClick={() => setProductModal(false)} disabled={submitting} className="flex-1 py-2.5 border border-gray-200 rounded-2xl font-bold text-xs text-gray-600">Cancel</button>
+              <button onClick={submitProduct} disabled={submitting} className="flex-1 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310] disabled:opacity-50">
+                {submitting ? 'Saving...' : (editingProduct ? 'Update Product' : 'Add Product')}
               </button>
             </div>
           </div>
@@ -934,9 +957,9 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setCakeModal(false)} className="flex-1 py-2.5 border border-gray-200 rounded-2xl font-bold text-xs text-gray-600">Cancel</button>
-              <button onClick={submitCake} className="flex-1 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310]">
-                {editingCake ? 'Update Cake' : 'Save Cake'}
+              <button onClick={() => setCakeModal(false)} disabled={submitting} className="flex-1 py-2.5 border border-gray-200 rounded-2xl font-bold text-xs text-gray-600">Cancel</button>
+              <button onClick={submitCake} disabled={submitting} className="flex-1 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310] disabled:opacity-50">
+                {submitting ? 'Saving...' : (editingCake ? 'Update Cake' : 'Save Cake')}
               </button>
             </div>
           </div>
@@ -993,9 +1016,9 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setCustomModal(false)} className="flex-1 py-2.5 border border-gray-200 rounded-2xl font-bold text-xs text-gray-600">Cancel</button>
-              <button onClick={submitCustomCake} className="flex-1 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310]">
-                Save Custom Design
+              <button onClick={() => setCustomModal(false)} disabled={submitting} className="flex-1 py-2.5 border border-gray-200 rounded-2xl font-bold text-xs text-gray-600">Cancel</button>
+              <button onClick={submitCustomCake} disabled={submitting} className="flex-1 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310] disabled:opacity-50">
+                {submitting ? 'Saving...' : 'Save Custom Design'}
               </button>
             </div>
           </div>
