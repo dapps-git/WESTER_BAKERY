@@ -7,34 +7,37 @@ import Product from '../models/Product.js'
 
 const router = express.Router()
 
-// Cloudinary config
+// Cloudinary config with fallback defaults
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'fpmj7xap',
+  api_key: process.env.CLOUDINARY_API_KEY || '228953851898214',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'iNY-ONPPCrF_dUlWox528onU8sQ',
 })
 
 // Multer memory storage (buffer before Cloudinary upload)
 const upload = multer({ storage: multer.memoryStorage() })
 
-// Helper: Compress to WebP then upload to Cloudinary
+// Helper: Compress to WebP then upload to Cloudinary (resilient to sharp failures)
 const uploadToCloudinary = (buffer, folder = 'westernbakery/products') => {
   return new Promise(async (resolve, reject) => {
     try {
-      // Convert to WebP at 80% quality using sharp
-      const webpBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
+      let imageBuffer = buffer
+      try {
+        imageBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
+      } catch (sharpErr) {
+        console.warn('Sharp compression skipped:', sharpErr.message)
+      }
 
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder, resource_type: 'image', format: 'webp' },
+        { folder, resource_type: 'image' },
         (error, result) => {
           if (error) return reject(error)
           resolve(result.secure_url)
         }
       )
 
-      // Pipe the WebP buffer into the upload stream
       const readable = new Readable()
-      readable.push(webpBuffer)
+      readable.push(imageBuffer)
       readable.push(null)
       readable.pipe(uploadStream)
     } catch (err) {
@@ -47,7 +50,6 @@ const uploadToCloudinary = (buffer, folder = 'westernbakery/products') => {
 const deleteFromCloudinary = async (imageUrl) => {
   if (!imageUrl || !imageUrl.includes('cloudinary.com')) return
   try {
-    // Extract public_id from URL
     const parts = imageUrl.split('/')
     const fileWithExt = parts[parts.length - 1]
     const file = fileWithExt.split('.')[0]
@@ -55,6 +57,37 @@ const deleteFromCloudinary = async (imageUrl) => {
     const publicId = `${folder}/${file}`
     await cloudinary.uploader.destroy(publicId)
   } catch {}
+}
+
+// Helper: Safely resolve any category input (ObjectId, name, legacy ID) to a valid ObjectId
+const resolveCategoryId = async (rawCategory) => {
+  const { default: Category } = await import('../models/Category.js')
+  const { default: mongoose } = await import('mongoose')
+
+  if (rawCategory && mongoose.Types.ObjectId.isValid(rawCategory)) {
+    const existing = await Category.findById(rawCategory)
+    if (existing) return existing._id
+  }
+
+  const defaultNameMap = {
+    'cat-1': 'Snacks',
+    'cat-2': 'Sandwich',
+    'cat-3': 'Burger',
+    'cat-4': 'Fried Chicken',
+    'cat-5': 'Shawarma',
+    'cat-6': 'Alfham & Shawai',
+    'cat-7': 'Pizza',
+    'cat-8': 'Fresh Juices',
+    'cat-9': 'Lime & Mojitos',
+    'cat-10': 'Tea & Coffee',
+  }
+
+  const catName = defaultNameMap[rawCategory] || rawCategory || 'Snacks'
+  let cat = await Category.findOne({ name: catName })
+  if (!cat) {
+    cat = await Category.create({ name: catName, icon: '🍽️' })
+  }
+  return cat._id
 }
 
 // GET all products
@@ -99,17 +132,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       imageUrl = await uploadToCloudinary(req.file.buffer, 'westernbakery/products')
     }
 
-    const { default: Category } = await import('../models/Category.js')
-    const { default: mongoose } = await import('mongoose')
-
-    let categoryId = req.body.category
-    if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
-      let cat = await Category.findOne({ name: categoryId })
-      if (!cat) {
-        cat = await Category.create({ name: categoryId, icon: '🍽️' })
-      }
-      categoryId = cat._id
-    }
+    const categoryId = await resolveCategoryId(req.body.category)
 
     const product = new Product({
       name: req.body.name,
@@ -142,15 +165,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
 
     if (req.body.name) product.name = req.body.name
     if (req.body.category) {
-      const { default: Category } = await import('../models/Category.js')
-      const { default: mongoose } = await import('mongoose')
-      let categoryId = req.body.category
-      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-        let cat = await Category.findOne({ name: categoryId })
-        if (!cat) cat = await Category.create({ name: categoryId, icon: '🍽️' })
-        categoryId = cat._id
-      }
-      product.category = categoryId
+      product.category = await resolveCategoryId(req.body.category)
     }
     if (req.body.price) product.price = req.body.price
 

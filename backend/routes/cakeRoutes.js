@@ -7,29 +7,35 @@ import Cake from '../models/Cake.js'
 
 const router = express.Router()
 
-// Cloudinary config
+// Cloudinary config with fallback defaults
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'fpmj7xap',
+  api_key: process.env.CLOUDINARY_API_KEY || '228953851898214',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'iNY-ONPPCrF_dUlWox528onU8sQ',
 })
 
 const upload = multer({ storage: multer.memoryStorage() })
 
-// Helper: Compress to WebP then upload to Cloudinary
+// Helper: Compress to WebP then upload to Cloudinary (resilient to sharp failures)
 const uploadToCloudinary = (buffer, folder = 'westernbakery/cakes') => {
   return new Promise(async (resolve, reject) => {
     try {
-      const webpBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
+      let imageBuffer = buffer
+      try {
+        imageBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
+      } catch (sharpErr) {
+        console.warn('Sharp compression skipped:', sharpErr.message)
+      }
+
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder, resource_type: 'image', format: 'webp' },
+        { folder, resource_type: 'image' },
         (error, result) => {
           if (error) return reject(error)
           resolve(result.secure_url)
         }
       )
       const readable = new Readable()
-      readable.push(webpBuffer)
+      readable.push(imageBuffer)
       readable.push(null)
       readable.pipe(uploadStream)
     } catch (err) {
