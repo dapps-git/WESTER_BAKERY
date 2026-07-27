@@ -99,9 +99,21 @@ router.post('/', upload.single('image'), async (req, res) => {
       imageUrl = await uploadToCloudinary(req.file.buffer, 'westernbakery/products')
     }
 
+    const { default: Category } = await import('../models/Category.js')
+    const { default: mongoose } = await import('mongoose')
+
+    let categoryId = req.body.category
+    if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
+      let cat = await Category.findOne({ name: categoryId })
+      if (!cat) {
+        cat = await Category.create({ name: categoryId, icon: '🍽️' })
+      }
+      categoryId = cat._id
+    }
+
     const product = new Product({
       name: req.body.name,
-      category: req.body.category,
+      category: categoryId,
       price: req.body.price,
       imageUrl,
     })
@@ -110,6 +122,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     const populated = await product.populate('category')
     res.status(201).json(populated)
   } catch (err) {
+    console.error('Product POST error:', err)
     res.status(400).json({ error: err.message })
   }
 })
@@ -128,13 +141,24 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     }
 
     if (req.body.name) product.name = req.body.name
-    if (req.body.category) product.category = req.body.category
+    if (req.body.category) {
+      const { default: Category } = await import('../models/Category.js')
+      const { default: mongoose } = await import('mongoose')
+      let categoryId = req.body.category
+      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+        let cat = await Category.findOne({ name: categoryId })
+        if (!cat) cat = await Category.create({ name: categoryId, icon: '🍽️' })
+        categoryId = cat._id
+      }
+      product.category = categoryId
+    }
     if (req.body.price) product.price = req.body.price
 
     await product.save()
     const populated = await product.populate('category')
     res.json(populated)
   } catch (err) {
+    console.error('Product PUT error:', err)
     res.status(400).json({ error: err.message })
   }
 })

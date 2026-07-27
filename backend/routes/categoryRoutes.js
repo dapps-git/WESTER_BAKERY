@@ -19,11 +19,16 @@ const DEFAULT_CATEGORIES = [
 // GET all categories
 router.get('/', async (req, res) => {
   try {
-    const categories = await Category.find().sort({ createdAt: 1 })
-    if (categories && categories.length > 0) {
-      return res.json(categories)
+    let categories = await Category.find().sort({ createdAt: 1 })
+    if (!categories || categories.length === 0) {
+      try {
+        const seedDocs = DEFAULT_CATEGORIES.map(c => ({ name: c.name, icon: c.icon }))
+        categories = await Category.insertMany(seedDocs)
+      } catch (seedErr) {
+        return res.json(DEFAULT_CATEGORIES)
+      }
     }
-    res.json(DEFAULT_CATEGORIES)
+    return res.json(categories)
   } catch (err) {
     console.error('Category GET error:', err.message)
     res.json(DEFAULT_CATEGORIES)
