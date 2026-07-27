@@ -1,5 +1,15 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/admin",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.westernbakery.in"
+        }
+      ]
+    }
   ]
 }
