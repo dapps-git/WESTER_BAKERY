@@ -81,9 +81,16 @@ server.on('error', (err) => {
 })
 
 // Connect to MongoDB asynchronously
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://dappstech2025_db_user:dapps1234@cluster0.ecrnbjn.mongodb.net/WESTERNBAKERY?appName=Cluster0'
+const defaultMongoURI = 'mongodb+srv://dappstech2025_db_user:dapps1234@cluster0.ecrnbjn.mongodb.net/WESTERNBAKERY?appName=Cluster0'
+let mongoURI = process.env.MONGO_URI || defaultMongoURI
+
+if (mongoURI.includes('westernbakehouseptb_db_user')) {
+  mongoURI = defaultMongoURI
+}
 
 mongoose
-  .connect(mongoURI)
+  .connect(mongoURI, {
+    serverSelectionTimeoutMS: 5000,
+  })
   .then(() => console.log('✅ MongoDB connected — WESTERNBAKERY'))
   .catch((err) => console.error('❌ MongoDB connection error:', err))
