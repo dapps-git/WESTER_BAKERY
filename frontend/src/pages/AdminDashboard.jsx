@@ -184,6 +184,11 @@ export default function AdminDashboard() {
   }
 
   const submitProduct = async () => {
+    if (!productForm.name.trim()) return notify('Product name is required', false)
+    if (!productForm.category) return notify('Please select a category', false)
+    if (!productForm.price) return notify('Price is required', false)
+    if (!editingProduct && !productForm.image) return notify('Please upload a product image', false)
+
     try {
       const fd = new FormData()
       fd.append('name', productForm.name)
@@ -248,6 +253,10 @@ export default function AdminDashboard() {
   }
 
   const submitCake = async () => {
+    if (!cakeForm.name.trim()) return notify('Cake name is required', false)
+    if (!cakeForm.price500g && !cakeForm.price1kg) return notify('Please enter at least one price (500g or 1kg)', false)
+    if (!editingCake && !cakeForm.image) return notify('Please upload a cake image', false)
+
     try {
       const prices = []
       if (cakeForm.price500g) prices.push({ weight: '500g', price: Number(cakeForm.price500g) })
