@@ -81,7 +81,7 @@ server.on('error', (err) => {
 })
 
 // Connect to MongoDB asynchronously
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://westernbakehouseptb_db_user:WESTERNBAKERY@cluster0.ecrnbjn.mongodb.net/WESTERNBAKERY?appName=Cluster0'
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://dappstech2025_db_user:dapps1234@cluster0.ecrnbjn.mongodb.net/WESTERNBAKERY?appName=Cluster0'
 
 mongoose
   .connect(mongoURI)
