@@ -470,27 +470,30 @@ export default function Cakes() {
             )}
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
-              {filteredCustom.map((item, index) => (
-                <div
-                  key={item._id || index}
-                  onClick={() => setLightboxImg(item.imageUrl)}
-                  className="aspect-square bg-gray-100 rounded-none overflow-hidden cursor-pointer group border border-[#EDE8DE] hover:border-[#6a2e16] transition-all duration-300 relative shadow-2xs"
-                >
-                  <img
-                    src={item.imageUrl}
-                    alt="Customized Cake"
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.src = '/cake1.png'
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 bg-black/75 text-white text-[10px] font-bold px-2 py-1 rounded-none transition-opacity uppercase tracking-wider">
-                      🔍 Full View
-                    </span>
+              {filteredCustom.map((item, index) => {
+                const imgUrl = item.imageUrl?.startsWith('/') ? `${API}${item.imageUrl}` : item.imageUrl
+                return (
+                  <div
+                    key={item._id || index}
+                    onClick={() => setLightboxImg(imgUrl)}
+                    className="aspect-square bg-gray-100 rounded-none overflow-hidden cursor-pointer group border border-[#EDE8DE] hover:border-[#6a2e16] transition-all duration-300 relative shadow-2xs"
+                  >
+                    <img
+                      src={imgUrl}
+                      alt="Customized Cake"
+                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.src = '/cake1.png'
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 bg-black/75 text-white text-[10px] font-bold px-2 py-1 rounded-none transition-opacity uppercase tracking-wider">
+                        🔍 Full View
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         ) : (

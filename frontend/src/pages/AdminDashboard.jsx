@@ -711,23 +711,26 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {customCakes.map((cc) => (
-                    <div key={cc._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group relative">
-                      <div className="aspect-square bg-gray-100 overflow-hidden">
-                        <img src={cc.imageUrl} alt={cc.name || 'Custom Cake'} className="w-full h-full object-cover" />
+                  {customCakes.map((cc) => {
+                    const imgUrl = cc.imageUrl?.startsWith('/') ? `${API}${cc.imageUrl}` : cc.imageUrl
+                    return (
+                      <div key={cc._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group relative">
+                        <div className="aspect-square bg-gray-100 overflow-hidden">
+                          <img src={imgUrl} alt={cc.name || 'Custom Cake'} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="p-3 flex items-center justify-between">
+                          <span className="text-xs font-semibold text-gray-700 truncate">{cc.name || 'Custom Cake'}</span>
+                          <button
+                            onClick={() => deleteCustomCake(cc._id)}
+                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Photo"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </div>
-                      <div className="p-3 flex items-center justify-between">
-                        <span className="text-xs font-semibold text-gray-700 truncate">{cc.name || 'Custom Cake'}</span>
-                        <button
-                          onClick={() => deleteCustomCake(cc._id)}
-                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete Photo"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
