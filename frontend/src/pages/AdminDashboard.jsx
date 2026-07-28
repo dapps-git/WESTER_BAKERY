@@ -119,7 +119,12 @@ export default function AdminDashboard() {
       ])
 
       if (p.status === 'fulfilled') setProducts(p.value.data)
-      if (c.status === 'fulfilled' && c.value.data?.length > 0) setCategories(c.value.data)
+      if (c.status === 'fulfilled' && c.value.data?.length > 0) {
+        const apiCats = c.value.data
+        const apiCatNames = new Set(apiCats.map(cat => cat.name.toLowerCase()))
+        const missingStatic = DEFAULT_FOOD_CATEGORIES.filter(sc => !apiCatNames.has(sc.name.toLowerCase()))
+        setCategories([...apiCats, ...missingStatic])
+      }
       if (ck.status === 'fulfilled') setCakes(ck.value.data)
       if (cc.status === 'fulfilled') setCustomCakes(cc.value.data)
     } catch {
