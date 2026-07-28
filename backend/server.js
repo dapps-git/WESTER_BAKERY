@@ -90,12 +90,8 @@ server.on('error', (err) => {
 })
 
 // Connect to MongoDB asynchronously
-const defaultMongoURI = 'mongodb+srv://dappstech2025_db_user:dapps1234@cluster0.ecrnbjn.mongodb.net/WESTERNBAKERY?appName=Cluster0'
-let mongoURI = process.env.MONGO_URI || defaultMongoURI
-
-if (mongoURI.includes('westernbakehouseptb_db_user')) {
-  mongoURI = defaultMongoURI
-}
+const defaultMongoURI = 'mongodb+srv://westernbakehouseptb_db_user:westernbakery@cluster0.jsfljpe.mongodb.net/WESTERNBAKERY?appName=Cluster0'
+const mongoURI = process.env.MONGO_URI || defaultMongoURI
 
 mongoose
   .connect(mongoURI, {
