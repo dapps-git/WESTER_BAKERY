@@ -7,6 +7,16 @@ import Product from '../models/Product.js'
 
 const router = express.Router()
 
+// Per-route OPTIONS preflight handlers (belt-and-suspenders for cPanel/Passenger)
+const corsHeaders = (res) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+  res.header('Access-Control-Max-Age', '86400')
+}
+router.options('/', (req, res) => { corsHeaders(res); res.sendStatus(200) })
+router.options('/:id', (req, res) => { corsHeaders(res); res.sendStatus(200) })
+
 // Cloudinary config with fallback defaults
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'fpmj7xap',

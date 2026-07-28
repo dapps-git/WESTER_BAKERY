@@ -3,6 +3,16 @@ import Category from '../models/Category.js'
 
 const router = express.Router()
 
+// Per-route OPTIONS preflight handlers
+const corsHeaders = (res) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+  res.header('Access-Control-Max-Age', '86400')
+}
+router.options('/', (req, res) => { corsHeaders(res); res.sendStatus(200) })
+router.options('/:id', (req, res) => { corsHeaders(res); res.sendStatus(200) })
+
 const DEFAULT_CATEGORIES = [
   { _id: 'cat-1', name: 'Snacks', icon: '🥐' },
   { _id: 'cat-2', name: 'Sandwich', icon: '🥪' },
