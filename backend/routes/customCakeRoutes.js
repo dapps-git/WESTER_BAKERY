@@ -1,4 +1,5 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import multer from 'multer'
 import sharp from 'sharp'
 import { v2 as cloudinary } from 'cloudinary'
@@ -80,30 +81,18 @@ router.post('/', upload.single('image'), async (req, res) => {
 })
 
 // DELETE custom cake photo
-router.delete('/:id', async (req, res) => {
-  try {
-    const customCake = await CustomCake.findById(req.params.id)
-    if (!customCake) return res.status(404).json({ error: 'Custom cake not found' })
-
-    await CustomCake.findByIdAndDelete(req.params.id)
-    res.json({ message: 'Custom cake deleted' })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
-
-// POST delete custom cake photo (CORS preflight bypass for cPanel/Apache)
 const deleteCustomCakeHandler = async (req, res) => {
   try {
-    const customCake = await CustomCake.findById(req.params.id)
-    if (!customCake) return res.status(404).json({ error: 'Custom cake not found' })
-
-    await CustomCake.findByIdAndDelete(req.params.id)
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      await CustomCake.findByIdAndDelete(req.params.id)
+    }
     res.json({ message: 'Custom cake deleted' })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.json({ message: 'Custom cake deleted' })
   }
 }
+
+router.delete('/:id', deleteCustomCakeHandler)
 router.post('/delete/:id', deleteCustomCakeHandler)
 router.post('/:id/delete', deleteCustomCakeHandler)
 

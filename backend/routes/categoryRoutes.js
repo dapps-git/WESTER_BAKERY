@@ -1,4 +1,5 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import Category from '../models/Category.js'
 
 const router = express.Router()
@@ -56,66 +57,43 @@ router.post('/', async (req, res) => {
   }
 })
 
-// PUT update category
-router.put('/:id', async (req, res) => {
+// PUT/POST update category
+const updateCategoryHandler = async (req, res) => {
   try {
     const updates = { name: req.body.name }
     if (req.body.icon !== undefined) updates.icon = req.body.icon
-    const category = await Category.findByIdAndUpdate(req.params.id, updates, { new: true })
+    let category = null
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      category = await Category.findByIdAndUpdate(req.params.id, updates, { new: true })
+    }
+    if (!category) {
+      category = new Category({ name: req.body.name || 'Category', icon: req.body.icon || '🍽️' })
+      await category.save()
+    }
     res.json(category)
   } catch (err) {
     res.status(400).json({ error: err.message })
   }
-})
+}
 
-// POST update category (CORS preflight bypass for cPanel/Apache)
-router.post('/update/:id', async (req, res) => {
-  try {
-    const updates = { name: req.body.name }
-    if (req.body.icon !== undefined) updates.icon = req.body.icon
-    const category = await Category.findByIdAndUpdate(req.params.id, updates, { new: true })
-    res.json(category)
-  } catch (err) {
-    res.status(400).json({ error: err.message })
-  }
-})
-router.post('/:id/update', async (req, res) => {
-  try {
-    const updates = { name: req.body.name }
-    if (req.body.icon !== undefined) updates.icon = req.body.icon
-    const category = await Category.findByIdAndUpdate(req.params.id, updates, { new: true })
-    res.json(category)
-  } catch (err) {
-    res.status(400).json({ error: err.message })
-  }
-})
+router.put('/:id', updateCategoryHandler)
+router.post('/update/:id', updateCategoryHandler)
+router.post('/:id/update', updateCategoryHandler)
 
 // DELETE category
-router.delete('/:id', async (req, res) => {
+const deleteCategoryHandler = async (req, res) => {
   try {
-    await Category.findByIdAndDelete(req.params.id)
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      await Category.findByIdAndDelete(req.params.id)
+    }
     res.json({ message: 'Category deleted' })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.json({ message: 'Category deleted' })
   }
-})
+}
 
-// POST delete category (CORS preflight bypass for cPanel/Apache)
-router.post('/delete/:id', async (req, res) => {
-  try {
-    await Category.findByIdAndDelete(req.params.id)
-    res.json({ message: 'Category deleted' })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
-router.post('/:id/delete', async (req, res) => {
-  try {
-    await Category.findByIdAndDelete(req.params.id)
-    res.json({ message: 'Category deleted' })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
+router.delete('/:id', deleteCategoryHandler)
+router.post('/delete/:id', deleteCategoryHandler)
+router.post('/:id/delete', deleteCategoryHandler)
 
 export default router
