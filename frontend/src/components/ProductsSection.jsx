@@ -496,7 +496,21 @@ export default function ProductsSection() {
         }
         if (cRes.data && cRes.data.length > 0) {
           const apiCats = cRes.data.filter(c => c.name.toLowerCase() !== 'cakes')
-          setCategories(apiCats)
+          const staticDefaults = [
+            { _id: 'cat-1', name: 'Snacks' },
+            { _id: 'cat-2', name: 'Sandwich' },
+            { _id: 'cat-3', name: 'Burger' },
+            { _id: 'cat-4', name: 'Fried Chicken' },
+            { _id: 'cat-5', name: 'Shawarma' },
+            { _id: 'cat-6', name: 'Alfham & Shawai' },
+            { _id: 'cat-7', name: 'Pizza' },
+            { _id: 'cat-8', name: 'Fresh Juices' },
+            { _id: 'cat-9', name: 'Lime & Mojitos' },
+            { _id: 'cat-10', name: 'Tea & Coffee' },
+          ]
+          const apiCatNames = new Set(apiCats.map(c => c.name.toLowerCase()))
+          const missingStatic = staticDefaults.filter(sc => !apiCatNames.has(sc.name.toLowerCase()))
+          setCategories([...apiCats, ...missingStatic])
         }
       } catch {
         /* fallback to demo items */

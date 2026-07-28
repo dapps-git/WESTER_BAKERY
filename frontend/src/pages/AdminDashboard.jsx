@@ -68,7 +68,7 @@ export default function AdminDashboard() {
   // Products & Categories state
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState(DEFAULT_FOOD_CATEGORIES)
-  const [productForm, setProductForm] = useState({ name: '', category: '', price: '', image: null })
+  const [productForm, setProductForm] = useState({ name: '', category: '', price: '', description: '', image: null })
   const [editingProduct, setEditingProduct] = useState(null)
   const [productModal, setProductModal] = useState(false)
   const [imgPreview, setImgPreview] = useState(null)
@@ -185,14 +185,14 @@ export default function AdminDashboard() {
   // ─── Product CRUD ───────────────────────────────────────────────────────────
   const openAddProduct = () => {
     setEditingProduct(null)
-    setProductForm({ name: '', category: '', price: '', image: null })
+    setProductForm({ name: '', category: '', price: '', description: '', image: null })
     setImgPreview(null)
     setProductModal(true)
   }
 
   const openEditProduct = (p) => {
     setEditingProduct(p)
-    setProductForm({ name: p.name, category: p.category?._id || '', price: p.price, image: null })
+    setProductForm({ name: p.name, category: p.category?._id || '', price: p.price, description: p.description || '', image: null })
     setImgPreview(p.imageUrl || null)
     setProductModal(true)
   }
@@ -209,6 +209,7 @@ export default function AdminDashboard() {
       fd.append('name', productForm.name)
       fd.append('category', productForm.category)
       fd.append('price', productForm.price)
+      fd.append('description', productForm.description || '')
       if (productForm.image) fd.append('image', productForm.image)
 
       if (editingProduct) {
@@ -816,6 +817,17 @@ export default function AdminDashboard() {
                   value={productForm.price}
                   onChange={(e) => setProductForm((f) => ({ ...f, price: e.target.value }))}
                   placeholder="e.g. 120"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-600 uppercase tracking-wider mb-1.5">Description (Optional)</label>
+                <textarea
+                  rows={2}
+                  className="w-full border border-gray-200 rounded-2xl px-4 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#6a2e16]"
+                  value={productForm.description}
+                  onChange={(e) => setProductForm((f) => ({ ...f, description: e.target.value }))}
+                  placeholder="e.g. Crunchy chicken stuffed with spices and mint chutney..."
                 />
               </div>
 
