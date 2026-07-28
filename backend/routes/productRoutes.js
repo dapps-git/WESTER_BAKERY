@@ -138,6 +138,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       name: req.body.name,
       category: categoryId,
       price: req.body.price,
+      description: req.body.description || '',
       imageUrl,
     })
 
@@ -168,6 +169,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
       product.category = await resolveCategoryId(req.body.category)
     }
     if (req.body.price) product.price = req.body.price
+    if (req.body.description !== undefined) product.description = req.body.description
 
     await product.save()
     const populated = await product.populate('category')
