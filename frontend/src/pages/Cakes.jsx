@@ -471,7 +471,7 @@ export default function Cakes() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
               {filteredCustom.map((item, index) => {
-                const imgUrl = item.imageUrl?.startsWith('/') ? `${API}${item.imageUrl}` : item.imageUrl
+                const imgUrl = item.imageUrl?.startsWith('/uploads/') ? `${API}${item.imageUrl}` : item.imageUrl
                 return (
                   <div
                     key={item._id || index}
