@@ -218,7 +218,7 @@ export default function AdminDashboard() {
       if (productForm.image) fd.append('image', productForm.image)
 
       if (editingProduct) {
-        await axios.put(`${API}/api/products/${editingProduct._id}`, fd)
+        await axios.post(`${API}/api/products/update/${editingProduct._id}`, fd)
         notify('Product updated!')
       } else {
         await axios.post(`${API}/api/products`, fd)
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
   const deleteProduct = async (id) => {
     if (!confirm('Delete this product?')) return
     try {
-      await axios.delete(`${API}/api/products/${id}`)
+      await axios.post(`${API}/api/products/delete/${id}`)
       notify('Product deleted!')
       loadData()
     } catch {
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
       if (cakeForm.image) fd.append('image', cakeForm.image)
 
       if (editingCake) {
-        await axios.put(`${API}/api/cakes/${editingCake._id}`, fd)
+        await axios.post(`${API}/api/cakes/update/${editingCake._id}`, fd)
         notify('Cake updated!')
       } else {
         await axios.post(`${API}/api/cakes`, fd)
@@ -313,7 +313,7 @@ export default function AdminDashboard() {
   const deleteCake = async (id) => {
     if (!confirm('Delete this cake from collection?')) return
     try {
-      await axios.delete(`${API}/api/cakes/${id}`)
+      await axios.post(`${API}/api/cakes/delete/${id}`)
       notify('Cake deleted!')
       loadData()
     } catch {
@@ -354,7 +354,7 @@ export default function AdminDashboard() {
   const deleteCustomCake = async (id) => {
     if (!confirm('Delete this custom cake photo?')) return
     try {
-      await axios.delete(`${API}/api/custom-cakes/${id}`)
+      await axios.post(`${API}/api/custom-cakes/delete/${id}`)
       notify('Custom cake photo deleted!')
       loadData()
     } catch {
@@ -380,7 +380,7 @@ export default function AdminDashboard() {
   const submitCat = async () => {
     try {
       if (editingCat) {
-        await axios.put(`${API}/api/categories/${editingCat._id}`, catForm)
+        await axios.post(`${API}/api/categories/update/${editingCat._id}`, catForm)
         notify('Category updated!')
       } else {
         await axios.post(`${API}/api/categories`, catForm)
@@ -396,7 +396,7 @@ export default function AdminDashboard() {
   const deleteCat = async (id) => {
     if (!confirm('Delete this category?')) return
     try {
-      await axios.delete(`${API}/api/categories/${id}`)
+      await axios.post(`${API}/api/categories/delete/${id}`)
       notify('Category deleted!')
       loadData()
     } catch {
