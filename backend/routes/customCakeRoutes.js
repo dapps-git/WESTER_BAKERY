@@ -1,27 +1,46 @@
 import express from 'express'
 import multer from 'multer'
-import path from 'path'
-import fs from 'fs'
 import sharp from 'sharp'
+import { v2 as cloudinary } from 'cloudinary'
+import { Readable } from 'stream'
 import CustomCake from '../models/CustomCake.js'
 
 const router = express.Router()
 
-// Storage & WebP Compression Setup
-const uploadsDir = path.join(process.cwd(), 'uploads')
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true })
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'fpmj7xap',
+  api_key: process.env.CLOUDINARY_API_KEY || '228953851898214',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'iNY-ONPPCrF_dUlWox528onU8sQ',
+})
 
-const storage = multer.memoryStorage()
-const upload = multer({ storage })
+const upload = multer({ storage: multer.memoryStorage() })
 
-// Helper: Save uploaded buffer as optimized WebP
-const saveWebp = async (buffer) => {
-  const filename = `custom-cake-${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`
-  const filepath = path.join(uploadsDir, filename)
-  await sharp(buffer).webp({ quality: 80 }).toFile(filepath)
-  return `/uploads/${filename}`
+// Helper: Compress to WebP then upload to Cloudinary
+const uploadToCloudinary = (buffer, folder = 'westernbakery/custom-cakes') => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let imageBuffer = buffer
+      try {
+        imageBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
+      } catch (sharpErr) {
+        console.warn('Sharp compression skipped:', sharpErr.message)
+      }
+
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder, resource_type: 'image' },
+        (error, result) => {
+          if (error) return reject(error)
+          resolve(result.secure_url)
+        }
+      )
+      const readable = new Readable()
+      readable.push(imageBuffer)
+      readable.push(null)
+      readable.pipe(uploadStream)
+    } catch (err) {
+      reject(err)
+    }
+  })
 }
 
 // GET all custom cakes
@@ -35,13 +54,13 @@ router.get('/', async (req, res) => {
   }
 })
 
-// POST create custom cake photo (Auto WebP conversion)
+// POST create custom cake photo
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     let imageUrl = req.body.imageUrl || ''
 
     if (req.file) {
-      imageUrl = await saveWebp(req.file.buffer)
+      imageUrl = await uploadToCloudinary(req.file.buffer, 'westernbakery/custom-cakes')
     }
 
     if (!imageUrl) {
@@ -65,13 +84,6 @@ router.delete('/:id', async (req, res) => {
   try {
     const customCake = await CustomCake.findById(req.params.id)
     if (!customCake) return res.status(404).json({ error: 'Custom cake not found' })
-
-    if (customCake.imageUrl && customCake.imageUrl.startsWith('/uploads/')) {
-      const oldPath = path.join(process.cwd(), customCake.imageUrl)
-      if (fs.existsSync(oldPath)) {
-        try { fs.unlinkSync(oldPath) } catch {}
-      }
-    }
 
     await CustomCake.findByIdAndDelete(req.params.id)
     res.json({ message: 'Custom cake deleted' })
