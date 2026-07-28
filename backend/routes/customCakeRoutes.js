@@ -92,4 +92,19 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
+// POST delete custom cake photo (CORS preflight bypass for cPanel/Apache)
+const deleteCustomCakeHandler = async (req, res) => {
+  try {
+    const customCake = await CustomCake.findById(req.params.id)
+    if (!customCake) return res.status(404).json({ error: 'Custom cake not found' })
+
+    await CustomCake.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Custom cake deleted' })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+}
+router.post('/delete/:id', deleteCustomCakeHandler)
+router.post('/:id/delete', deleteCustomCakeHandler)
+
 export default router

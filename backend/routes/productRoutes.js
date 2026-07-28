@@ -190,6 +190,37 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   }
 })
 
+// POST update product (CORS preflight bypass for cPanel/Apache)
+const updateProductHandler = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+    if (!product) return res.status(404).json({ error: 'Product not found' })
+
+    if (req.file) {
+      await deleteFromCloudinary(product.imageUrl)
+      product.imageUrl = await uploadToCloudinary(req.file.buffer, 'westernbakery/products')
+    } else if (req.body.imageUrl) {
+      product.imageUrl = req.body.imageUrl
+    }
+
+    if (req.body.name) product.name = req.body.name
+    if (req.body.category) {
+      product.category = await resolveCategoryId(req.body.category)
+    }
+    if (req.body.price) product.price = req.body.price
+    if (req.body.description !== undefined) product.description = req.body.description
+
+    await product.save()
+    const populated = await product.populate('category')
+    res.json(populated)
+  } catch (err) {
+    console.error('Product POST update error:', err)
+    res.status(400).json({ error: err.message })
+  }
+}
+router.post('/update/:id', upload.single('image'), updateProductHandler)
+router.post('/:id/update', upload.single('image'), updateProductHandler)
+
 // DELETE product + Cloudinary image
 router.delete('/:id', async (req, res) => {
   try {
@@ -203,5 +234,21 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: err.message })
   }
 })
+
+// POST delete product (CORS preflight bypass for cPanel/Apache)
+const deleteProductHandler = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+    if (!product) return res.status(404).json({ error: 'Product not found' })
+
+    await deleteFromCloudinary(product.imageUrl)
+    await Product.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Product deleted' })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+}
+router.post('/delete/:id', deleteProductHandler)
+router.post('/:id/delete', deleteProductHandler)
 
 export default router

@@ -68,8 +68,48 @@ router.put('/:id', async (req, res) => {
   }
 })
 
+// POST update category (CORS preflight bypass for cPanel/Apache)
+router.post('/update/:id', async (req, res) => {
+  try {
+    const updates = { name: req.body.name }
+    if (req.body.icon !== undefined) updates.icon = req.body.icon
+    const category = await Category.findByIdAndUpdate(req.params.id, updates, { new: true })
+    res.json(category)
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+})
+router.post('/:id/update', async (req, res) => {
+  try {
+    const updates = { name: req.body.name }
+    if (req.body.icon !== undefined) updates.icon = req.body.icon
+    const category = await Category.findByIdAndUpdate(req.params.id, updates, { new: true })
+    res.json(category)
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+})
+
 // DELETE category
 router.delete('/:id', async (req, res) => {
+  try {
+    await Category.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Category deleted' })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// POST delete category (CORS preflight bypass for cPanel/Apache)
+router.post('/delete/:id', async (req, res) => {
+  try {
+    await Category.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Category deleted' })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+router.post('/:id/delete', async (req, res) => {
   try {
     await Category.findByIdAndDelete(req.params.id)
     res.json({ message: 'Category deleted' })
