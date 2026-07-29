@@ -15,6 +15,7 @@ router.options('/', (req, res) => { corsHeaders(res); res.sendStatus(200) })
 router.options('/:id', (req, res) => { corsHeaders(res); res.sendStatus(200) })
 
 const DEFAULT_CATEGORIES = [
+  { _id: 'cat-0', name: 'Biryani', icon: '🍲' },
   { _id: 'cat-1', name: 'Snacks', icon: '🥐' },
   { _id: 'cat-2', name: 'Sandwich', icon: '🥪' },
   { _id: 'cat-3', name: 'Burger', icon: '🍔' },

@@ -1,4 +1,5 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import multer from 'multer'
 import sharp from 'sharp'
 import { v2 as cloudinary } from 'cloudinary'
