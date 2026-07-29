@@ -13,9 +13,37 @@ import {
   Cookie,
   Utensils,
   Flame,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
 } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+const CATEGORY_PRIORITY_ORDER = [
+  'birya',
+  'biriya',
+  'pizza',
+  'shawarma',
+  'snack',
+  'sandwich',
+  'burger',
+  'fried',
+  'alfham',
+  'shawai',
+  'fresh juice',
+  'juice',
+  'lime',
+  'mojito',
+  'tea',
+  'coffee',
+]
+
+const getCatRank = (catName) => {
+  const k = (catName || '').toLowerCase()
+  const idx = CATEGORY_PRIORITY_ORDER.findIndex(key => k.includes(key))
+  return idx !== -1 ? idx : 99
+}
 
 const getCategoryIcon = (name) => {
   const k = name.toLowerCase()
@@ -467,13 +495,13 @@ export default function ProductsSection() {
   const [products, setProducts] = useState(DEMO_FOOD)
   const [categories, setCategories] = useState([
     { _id: 'cat-0', name: 'Biryani' },
-    { _id: 'cat-1', name: 'Snacks' },
-    { _id: 'cat-2', name: 'Sandwich' },
-    { _id: 'cat-3', name: 'Burger' },
-    { _id: 'cat-4', name: 'Fried Chicken' },
-    { _id: 'cat-5', name: 'Shawarma' },
-    { _id: 'cat-6', name: 'Alfham & Shawai' },
-    { _id: 'cat-7', name: 'Pizza' },
+    { _id: 'cat-1', name: 'Pizza' },
+    { _id: 'cat-2', name: 'Shawarma' },
+    { _id: 'cat-3', name: 'Snacks' },
+    { _id: 'cat-4', name: 'Sandwich' },
+    { _id: 'cat-5', name: 'Burger' },
+    { _id: 'cat-6', name: 'Fried Chicken' },
+    { _id: 'cat-7', name: 'Alfham & Shawai' },
     { _id: 'cat-8', name: 'Fresh Juices' },
     { _id: 'cat-9', name: 'Lime & Mojitos' },
     { _id: 'cat-10', name: 'Tea & Coffee' },
@@ -482,6 +510,7 @@ export default function ProductsSection() {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [sortPrice, setSortPrice] = useState('none') // 'none' | 'asc' | 'desc'
   const [selectedItem, setSelectedItem] = useState(null)
   const [selectedSizeIdx, setSelectedSizeIdx] = useState(0)
 
@@ -500,13 +529,13 @@ export default function ProductsSection() {
           const apiCats = cRes.data.filter(c => c.name.toLowerCase() !== 'cakes')
           const staticDefaults = [
             { _id: 'cat-0', name: 'Biryani' },
-            { _id: 'cat-1', name: 'Snacks' },
-            { _id: 'cat-2', name: 'Sandwich' },
-            { _id: 'cat-3', name: 'Burger' },
-            { _id: 'cat-4', name: 'Fried Chicken' },
-            { _id: 'cat-5', name: 'Shawarma' },
-            { _id: 'cat-6', name: 'Alfham & Shawai' },
-            { _id: 'cat-7', name: 'Pizza' },
+            { _id: 'cat-1', name: 'Pizza' },
+            { _id: 'cat-2', name: 'Shawarma' },
+            { _id: 'cat-3', name: 'Snacks' },
+            { _id: 'cat-4', name: 'Sandwich' },
+            { _id: 'cat-5', name: 'Burger' },
+            { _id: 'cat-6', name: 'Fried Chicken' },
+            { _id: 'cat-7', name: 'Alfham & Shawai' },
             { _id: 'cat-8', name: 'Fresh Juices' },
             { _id: 'cat-9', name: 'Lime & Mojitos' },
             { _id: 'cat-10', name: 'Tea & Coffee' },
@@ -514,13 +543,7 @@ export default function ProductsSection() {
           const apiCatNames = new Set(apiCats.map(c => c.name.toLowerCase()))
           const missingStatic = staticDefaults.filter(sc => !apiCatNames.has(sc.name.toLowerCase()))
           const merged = [...apiCats, ...missingStatic]
-          merged.sort((a, b) => {
-            const aIsB = a.name.toLowerCase().includes('birya') || a.name.toLowerCase().includes('biriya')
-            const bIsB = b.name.toLowerCase().includes('birya') || b.name.toLowerCase().includes('biriya')
-            if (aIsB && !bIsB) return -1
-            if (!aIsB && bIsB) return 1
-            return 0
-          })
+          merged.sort((a, b) => getCatRank(a.name) - getCatRank(b.name))
           setCategories(merged)
         }
       } catch {
@@ -529,18 +552,24 @@ export default function ProductsSection() {
     })()
   }, [])
 
-  const filtered = products.filter(p => {
-    if (p.category?.name?.toLowerCase() === 'cakes') return false
-    const matchCat = active === 'All' || p.category?.name === active
-    const matchSrch = p.name.toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchSrch
-  }).sort((a, b) => {
-    const aIsB = a.category?.name?.toLowerCase().includes('birya') || a.category?.name?.toLowerCase().includes('biriya')
-    const bIsB = b.category?.name?.toLowerCase().includes('birya') || b.category?.name?.toLowerCase().includes('biriya')
-    if (aIsB && !bIsB) return -1
-    if (!aIsB && bIsB) return 1
-    return 0
-  })
+  const filtered = products
+    .filter(p => {
+      if (p.category?.name?.toLowerCase() === 'cakes') return false
+      const matchCat = active === 'All' || p.category?.name === active
+      const matchSrch = p.name.toLowerCase().includes(search.toLowerCase())
+      return matchCat && matchSrch
+    })
+    .sort((a, b) => {
+      const getPrice = (item) => (item.options && item.options.length > 0 ? item.options[0].price : item.price || 0)
+      if (sortPrice === 'asc') {
+        return getPrice(a) - getPrice(b)
+      }
+      if (sortPrice === 'desc') {
+        return getPrice(b) - getPrice(a)
+      }
+      // Default: Sort by Category Priority Order (Biryani -> Pizza -> Shawarma -> Snacks -> Drinks)
+      return getCatRank(a.category?.name) - getCatRank(b.category?.name)
+    })
 
   const handleBack = () => {
     if (window.history.state && window.history.state.idx > 0) {
@@ -562,7 +591,7 @@ export default function ProductsSection() {
       <div className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
         <div className="max-w-md mx-auto px-4 pt-3 pb-2">
 
-          {/* Top row: back | title | search */}
+          {/* Top row: back | title | actions (price sort + search) */}
           <div className="flex items-center justify-between mb-2">
             <button
               onClick={handleBack}
@@ -583,12 +612,30 @@ export default function ProductsSection() {
               </div>
             </div>
 
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="p-1.5 rounded-full text-[#6a2e16] hover:bg-gray-100 transition-colors"
-            >
-              <Search size={20} />
-            </button>
+            <div className="flex items-center gap-1">
+              {/* Price Sort Filter Button */}
+              <button
+                onClick={() => setSortPrice(prev => prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none')}
+                title={sortPrice === 'none' ? 'Sort by Price' : sortPrice === 'asc' ? 'Price: Low to High' : 'Price: High to Low'}
+                className={`px-2 py-1 rounded-full text-xs font-extrabold flex items-center gap-0.5 transition-all ${
+                  sortPrice !== 'none'
+                    ? 'bg-[#6a2e16] text-white shadow-xs'
+                    : 'bg-gray-100 text-[#6a2e16] hover:bg-gray-200'
+                }`}
+              >
+                <span>₹</span>
+                {sortPrice === 'asc' && <ArrowUp size={12} />}
+                {sortPrice === 'desc' && <ArrowDown size={12} />}
+                {sortPrice === 'none' && <ArrowUpDown size={12} />}
+              </button>
+
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="p-1.5 rounded-full text-[#6a2e16] hover:bg-gray-100 transition-colors"
+              >
+                <Search size={20} />
+              </button>
+            </div>
           </div>
 
           {/* Search input */}

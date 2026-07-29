@@ -35,15 +35,40 @@ const CAKE_CATEGORIES = [
   'Nuts & Caramel',
 ]
 
+const CATEGORY_PRIORITY_ORDER = [
+  'birya',
+  'biriya',
+  'pizza',
+  'shawarma',
+  'snack',
+  'sandwich',
+  'burger',
+  'fried',
+  'alfham',
+  'shawai',
+  'fresh juice',
+  'juice',
+  'lime',
+  'mojito',
+  'tea',
+  'coffee',
+]
+
+const getCatRank = (catName) => {
+  const k = (catName || '').toLowerCase()
+  const idx = CATEGORY_PRIORITY_ORDER.findIndex(key => k.includes(key))
+  return idx !== -1 ? idx : 99
+}
+
 const DEFAULT_FOOD_CATEGORIES = [
   { _id: 'cat-0', name: 'Biryani', icon: '🍲' },
-  { _id: 'cat-1', name: 'Snacks', icon: '🥐' },
-  { _id: 'cat-2', name: 'Sandwich', icon: '🥪' },
-  { _id: 'cat-3', name: 'Burger', icon: '🍔' },
-  { _id: 'cat-4', name: 'Fried Chicken', icon: '🍗' },
-  { _id: 'cat-5', name: 'Shawarma', icon: '🥙' },
-  { _id: 'cat-6', name: 'Alfham & Shawai', icon: '🔥' },
-  { _id: 'cat-7', name: 'Pizza', icon: '🍕' },
+  { _id: 'cat-1', name: 'Pizza', icon: '🍕' },
+  { _id: 'cat-2', name: 'Shawarma', icon: '🥙' },
+  { _id: 'cat-3', name: 'Snacks', icon: '🥐' },
+  { _id: 'cat-4', name: 'Sandwich', icon: '🥪' },
+  { _id: 'cat-5', name: 'Burger', icon: '🍔' },
+  { _id: 'cat-6', name: 'Fried Chicken', icon: '🍗' },
+  { _id: 'cat-7', name: 'Alfham & Shawai', icon: '🔥' },
   { _id: 'cat-8', name: 'Fresh Juices', icon: '🧃' },
   { _id: 'cat-9', name: 'Lime & Mojitos', icon: '🥤' },
   { _id: 'cat-10', name: 'Tea & Coffee', icon: '☕' },
@@ -125,13 +150,7 @@ export default function AdminDashboard() {
         const apiCatNames = new Set(apiCats.map(cat => cat.name.toLowerCase()))
         const missingStatic = DEFAULT_FOOD_CATEGORIES.filter(sc => !apiCatNames.has(sc.name.toLowerCase()))
         const merged = [...apiCats, ...missingStatic]
-        merged.sort((a, b) => {
-          const aIsB = a.name.toLowerCase().includes('birya') || a.name.toLowerCase().includes('biriya')
-          const bIsB = b.name.toLowerCase().includes('birya') || b.name.toLowerCase().includes('biriya')
-          if (aIsB && !bIsB) return -1
-          if (!aIsB && bIsB) return 1
-          return 0
-        })
+        merged.sort((a, b) => getCatRank(a.name) - getCatRank(b.name))
         setCategories(merged)
       }
       if (ck.status === 'fulfilled') setCakes(ck.value.data)
