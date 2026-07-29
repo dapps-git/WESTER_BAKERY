@@ -63,6 +63,40 @@ const getCategoryIcon = (name) => {
 }
 
 const DEMO_FOOD = [
+  // ── BIRYANI ──
+  {
+    _id: 'f-bir-1',
+    name: 'Biriyani Half',
+    price: 120,
+    category: { name: 'Biryani' },
+    imageUrl: 'https://res.cloudinary.com/fpmj7xap/image/upload/v1785323764/westernbakery/products/bctd8zsmkrfmsjkwjk0u.webp',
+    description: 'Biryani is a mixed rice dish traditionally made with rice, meat (chicken, goat, beef), seafood (prawns or fish), or vegetables, and spices.',
+  },
+  {
+    _id: 'f-bir-2',
+    name: 'Biriyani Full',
+    price: 150,
+    category: { name: 'Biryani' },
+    imageUrl: 'https://res.cloudinary.com/fpmj7xap/image/upload/v1785323799/westernbakery/products/zpnpcixcbuozbqpodc6m.webp',
+    description: 'Biryani is a mixed rice dish traditionally made with rice, meat (chicken, goat, beef), seafood (prawns or fish), or vegetables, and spices.',
+  },
+  {
+    _id: 'f-bir-3',
+    name: 'Half Rice',
+    price: 60,
+    category: { name: 'Biryani' },
+    imageUrl: 'https://res.cloudinary.com/fpmj7xap/image/upload/v1785323835/westernbakery/products/bhw0lg2dajbgiijktv1d.webp',
+    description: 'Biryani is a mixed rice dish traditionally made with rice, meat (chicken, goat, beef), seafood (prawns or fish), or vegetables, and spices.',
+  },
+  {
+    _id: 'f-bir-4',
+    name: 'Full Rice',
+    price: 80,
+    category: { name: 'Biryani' },
+    imageUrl: 'https://res.cloudinary.com/fpmj7xap/image/upload/v1785323867/westernbakery/products/rhipcyser29hdyv84j8b.webp',
+    description: 'Biryani is a mixed rice dish traditionally made with rice, meat (chicken, goat, beef), seafood (prawns or fish), or vegetables, and spices.',
+  },
+
   // ── SHAWARMA ──
   {
     _id: 'f-sp-1',
