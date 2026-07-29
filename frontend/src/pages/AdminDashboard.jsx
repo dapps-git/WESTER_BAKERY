@@ -36,6 +36,7 @@ const CAKE_CATEGORIES = [
 ]
 
 const DEFAULT_FOOD_CATEGORIES = [
+  { _id: 'cat-0', name: 'Biryani', icon: '🍲' },
   { _id: 'cat-1', name: 'Snacks', icon: '🥐' },
   { _id: 'cat-2', name: 'Sandwich', icon: '🥪' },
   { _id: 'cat-3', name: 'Burger', icon: '🍔' },
@@ -123,7 +124,15 @@ export default function AdminDashboard() {
         const apiCats = c.value.data
         const apiCatNames = new Set(apiCats.map(cat => cat.name.toLowerCase()))
         const missingStatic = DEFAULT_FOOD_CATEGORIES.filter(sc => !apiCatNames.has(sc.name.toLowerCase()))
-        setCategories([...apiCats, ...missingStatic])
+        const merged = [...apiCats, ...missingStatic]
+        merged.sort((a, b) => {
+          const aIsB = a.name.toLowerCase().includes('birya') || a.name.toLowerCase().includes('biriya')
+          const bIsB = b.name.toLowerCase().includes('birya') || b.name.toLowerCase().includes('biriya')
+          if (aIsB && !bIsB) return -1
+          if (!aIsB && bIsB) return 1
+          return 0
+        })
+        setCategories(merged)
       }
       if (ck.status === 'fulfilled') setCakes(ck.value.data)
       if (cc.status === 'fulfilled') setCustomCakes(cc.value.data)
@@ -235,12 +244,14 @@ export default function AdminDashboard() {
 
   const deleteProduct = async (id) => {
     if (!confirm('Delete this product?')) return
+    // Immediately remove from local state (optimistic UI)
+    setProducts(prev => prev.filter(p => p._id !== id))
+    notify('Product deleted!')
     try {
       await axios.post(`${API}/api/products/delete/${id}`)
-      notify('Product deleted!')
-      loadData()
     } catch {
-      notify('Error deleting', false)
+      // Still reload to ensure state is accurate
+      loadData()
     }
   }
 
@@ -312,12 +323,12 @@ export default function AdminDashboard() {
 
   const deleteCake = async (id) => {
     if (!confirm('Delete this cake from collection?')) return
+    setCakes(prev => prev.filter(c => c._id !== id))
+    notify('Cake deleted!')
     try {
       await axios.post(`${API}/api/cakes/delete/${id}`)
-      notify('Cake deleted!')
-      loadData()
     } catch {
-      notify('Error deleting cake', false)
+      loadData()
     }
   }
 

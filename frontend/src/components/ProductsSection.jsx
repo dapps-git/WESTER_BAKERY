@@ -20,6 +20,7 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const getCategoryIcon = (name) => {
   const k = name.toLowerCase()
   if (k === 'all') return <UtensilsCrossed size={13} />
+  if (k.includes('birya') || k.includes('biriya')) return <Utensils size={13} />
   if (k.includes('pizza')) return <Pizza size={13} />
   if (k.includes('burger')) return <Beef size={13} />
   if (k.includes('sandwich')) return <Sandwich size={13} />
@@ -465,6 +466,7 @@ export default function ProductsSection() {
   const navigate = useNavigate()
   const [products, setProducts] = useState(DEMO_FOOD)
   const [categories, setCategories] = useState([
+    { _id: 'cat-0', name: 'Biryani' },
     { _id: 'cat-1', name: 'Snacks' },
     { _id: 'cat-2', name: 'Sandwich' },
     { _id: 'cat-3', name: 'Burger' },
@@ -497,6 +499,7 @@ export default function ProductsSection() {
         if (cRes.data && cRes.data.length > 0) {
           const apiCats = cRes.data.filter(c => c.name.toLowerCase() !== 'cakes')
           const staticDefaults = [
+            { _id: 'cat-0', name: 'Biryani' },
             { _id: 'cat-1', name: 'Snacks' },
             { _id: 'cat-2', name: 'Sandwich' },
             { _id: 'cat-3', name: 'Burger' },
@@ -510,7 +513,15 @@ export default function ProductsSection() {
           ]
           const apiCatNames = new Set(apiCats.map(c => c.name.toLowerCase()))
           const missingStatic = staticDefaults.filter(sc => !apiCatNames.has(sc.name.toLowerCase()))
-          setCategories([...apiCats, ...missingStatic])
+          const merged = [...apiCats, ...missingStatic]
+          merged.sort((a, b) => {
+            const aIsB = a.name.toLowerCase().includes('birya') || a.name.toLowerCase().includes('biriya')
+            const bIsB = b.name.toLowerCase().includes('birya') || b.name.toLowerCase().includes('biriya')
+            if (aIsB && !bIsB) return -1
+            if (!aIsB && bIsB) return 1
+            return 0
+          })
+          setCategories(merged)
         }
       } catch {
         /* fallback to demo items */
@@ -523,6 +534,12 @@ export default function ProductsSection() {
     const matchCat = active === 'All' || p.category?.name === active
     const matchSrch = p.name.toLowerCase().includes(search.toLowerCase())
     return matchCat && matchSrch
+  }).sort((a, b) => {
+    const aIsB = a.category?.name?.toLowerCase().includes('birya') || a.category?.name?.toLowerCase().includes('biriya')
+    const bIsB = b.category?.name?.toLowerCase().includes('birya') || b.category?.name?.toLowerCase().includes('biriya')
+    if (aIsB && !bIsB) return -1
+    if (!aIsB && bIsB) return 1
+    return 0
   })
 
   const handleBack = () => {
