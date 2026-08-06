@@ -147,7 +147,7 @@ export default function ProductsSection() {
   return (
     <div className="bg-white min-h-screen font-sans text-gray-900 overflow-hidden">
 
-      {/* â”€â”€ Fixed Sticky Navbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Fixed Sticky Navbar ──────────────────────────────── */}
       <div className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
         <div className="max-w-md mx-auto px-4 pt-3 pb-2">
 
@@ -161,13 +161,13 @@ export default function ProductsSection() {
             </button>
 
             <div className="flex flex-col items-center">
-              <div className="text-base leading-none mb-0.5">ðŸ‘¨â€ðŸ³</div>
+              <div className="text-base leading-none mb-0.5">👨‍🍳</div>
               <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#6a2e16] tracking-wider italic leading-none">
                 Food Menu
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <div className="h-px w-5 bg-[#C8A27C]" />
-                <span className="text-[#8C6239] text-[9px] font-serif">âš”</span>
+                <span className="text-[#8C6239] text-[9px] font-serif">⚔</span>
                 <div className="h-px w-5 bg-[#C8A27C]" />
               </div>
             </div>
@@ -183,7 +183,7 @@ export default function ProductsSection() {
                     : 'bg-gray-100 text-[#6a2e16] hover:bg-gray-200'
                 }`}
               >
-                <span>â‚¹</span>
+                <span>₹</span>
                 {sortPrice === 'asc' && <ArrowUp size={12} />}
                 {sortPrice === 'desc' && <ArrowDown size={12} />}
                 {sortPrice === 'none' && <ArrowUpDown size={12} />}
@@ -249,7 +249,7 @@ export default function ProductsSection() {
         </div>
       </div>
 
-      {/* â”€â”€ Scrollable Content (padded below fixed navbar) â”€â”€ */}
+      {/* ── Scrollable Content (padded below fixed navbar) ── */}
       <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '170px' : '148px' }}>
 
         {/* Skeleton Card List during initial fetch */}
@@ -316,12 +316,9 @@ export default function ProductsSection() {
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         containerClassName="w-full h-full"
-                        onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80'
-                        }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-3xl text-gray-300">ðŸ½ï¸</div>
+                      <div className="w-full h-full flex items-center justify-center text-3xl text-gray-300">🍽️</div>
                     )}
 
                     {item.category?.name && (
@@ -344,7 +341,7 @@ export default function ProductsSection() {
 
                     <div className="flex items-center justify-between mt-2 pt-1 border-t border-gray-50">
                       <span className="font-extrabold text-sm text-[#6a2e16]">
-                        â‚¹{displayPrice} {hasOptions && <span className="text-[10px] text-gray-400 font-normal">({item.options[0].size})</span>}
+                        ₹{displayPrice} {hasOptions && <span className="text-[10px] text-gray-400 font-normal">({item.options[0].size})</span>}
                       </span>
                       <span className="text-[10px] font-bold text-[#6a2e16] bg-[#6a2e16]/10 px-2 py-0.5 rounded-full">
                         View
@@ -358,7 +355,7 @@ export default function ProductsSection() {
         )}
       </div>
 
-      {/* â”€â”€ Item Detail Modal â”€â”€ */}
+      {/* ── Item Detail Modal ── */}
       {selectedItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs"
@@ -377,7 +374,7 @@ export default function ProductsSection() {
                   containerClassName="w-full h-full"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-5xl">ðŸ½ï¸</div>
+                <div className="w-full h-full flex items-center justify-center text-5xl">🍽️</div>
               )}
               <button
                 onClick={() => setSelectedItem(null)}
@@ -418,7 +415,7 @@ export default function ProductsSection() {
                         }`}
                       >
                         <span className="block text-[10px] opacity-80">{opt.size}</span>
-                        <span className="text-sm">â‚¹{opt.price}</span>
+                        <span className="text-sm">₹{opt.price}</span>
                       </button>
                     ))}
                   </div>
@@ -429,7 +426,7 @@ export default function ProductsSection() {
                 <div>
                   <span className="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Price</span>
                   <span className="text-xl font-extrabold text-[#6a2e16]">
-                    â‚¹{selectedItem.options ? selectedItem.options[selectedSizeIdx]?.price : selectedItem.price}
+                    ₹{selectedItem.options ? selectedItem.options[selectedSizeIdx]?.price : selectedItem.price}
                   </span>
                 </div>
 

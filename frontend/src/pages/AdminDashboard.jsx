@@ -61,20 +61,6 @@ const getCatRank = (catName) => {
   return idx !== -1 ? idx : 99
 }
 
-const DEFAULT_FOOD_CATEGORIES = [
-  { _id: 'cat-0', name: 'Biryani', icon: '🍲' },
-  { _id: 'cat-1', name: 'Pizza', icon: '🍕' },
-  { _id: 'cat-2', name: 'Shawarma', icon: '🥙' },
-  { _id: 'cat-3', name: 'Snacks', icon: '🥐' },
-  { _id: 'cat-4', name: 'Sandwich', icon: '🥪' },
-  { _id: 'cat-5', name: 'Burger', icon: '🍔' },
-  { _id: 'cat-6', name: 'Fried Chicken', icon: '🍗' },
-  { _id: 'cat-7', name: 'Alfham & Shawai', icon: '🔥' },
-  { _id: 'cat-8', name: 'Fresh Juices', icon: '🧃' },
-  { _id: 'cat-9', name: 'Lime & Mojitos', icon: '🥤' },
-  { _id: 'cat-10', name: 'Tea & Coffee', icon: '☕' },
-]
-
 export default function AdminDashboard() {
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -94,7 +80,7 @@ export default function AdminDashboard() {
 
   // Products & Categories state
   const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState(DEFAULT_FOOD_CATEGORIES)
+  const [categories, setCategories] = useState([])
   const [adminFoodCatFilter, setAdminFoodCatFilter] = useState('All')
   const [adminFoodSearch, setAdminFoodSearch] = useState('')
   const [productForm, setProductForm] = useState({ name: '', category: '', price: '', description: '', image: null })
@@ -105,6 +91,8 @@ export default function AdminDashboard() {
 
   // Normal Cakes state
   const [cakes, setCakes] = useState([])
+  const [cakeCatFilter, setCakeCatFilter] = useState('All')
+  const [cakeSearch, setCakeSearch] = useState('')
   const [cakeForm, setCakeForm] = useState({
     name: '',
     category: 'Chocolate',
@@ -152,13 +140,10 @@ export default function AdminDashboard() {
       ])
 
       if (p.status === 'fulfilled') setProducts(p.value.data)
-      if (c.status === 'fulfilled' && c.value.data?.length > 0) {
-        const apiCats = c.value.data
-        const apiCatNames = new Set(apiCats.map(cat => cat.name.toLowerCase()))
-        const missingStatic = DEFAULT_FOOD_CATEGORIES.filter(sc => !apiCatNames.has(sc.name.toLowerCase()))
-        const merged = [...apiCats, ...missingStatic]
-        merged.sort((a, b) => getCatRank(a.name) - getCatRank(b.name))
-        setCategories(merged)
+      if (c.status === 'fulfilled' && c.value.data) {
+        const apiCats = c.value.data.filter(cat => cat.name.toLowerCase() !== 'cakes')
+        apiCats.sort((a, b) => getCatRank(a.name) - getCatRank(b.name))
+        setCategories(apiCats)
       }
       if (ck.status === 'fulfilled') setCakes(ck.value.data)
       if (cc.status === 'fulfilled') setCustomCakes(cc.value.data)
@@ -591,8 +576,9 @@ export default function AdminDashboard() {
         {/* ─── TAB 1: FOOD PRODUCTS ─── */}
         {tab === 'products' && (() => {
           const filteredAdminProducts = products.filter(p => {
-            const matchCat = adminFoodCatFilter === 'All' || p.category?.name === adminFoodCatFilter
-            const matchSearch = p.name.toLowerCase().includes(adminFoodSearch.toLowerCase())
+            const pCatName = typeof p.category === 'object' ? p.category?.name : (typeof p.category === 'string' ? p.category : '')
+            const matchCat = adminFoodCatFilter === 'All' || (pCatName && pCatName.toLowerCase() === adminFoodCatFilter.toLowerCase())
+            const matchSearch = p.name.toLowerCase().includes(adminFoodSearch.toLowerCase()) || (pCatName && pCatName.toLowerCase().includes(adminFoodSearch.toLowerCase()))
             return matchCat && matchSearch
           })
 
@@ -603,7 +589,7 @@ export default function AdminDashboard() {
                   <h2 className="font-serif text-2xl font-bold text-[#6a2e16]">
                     Food Products <span className="text-gray-400 text-lg font-sans font-normal">({filteredAdminProducts.length} of {products.length})</span>
                   </h2>
-                  <p className="text-xs text-gray-500 mt-0.5">Manage burgers, shawarmas, fried chicken & beverages</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Filter by category or search food items to quickly edit/delete</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -622,13 +608,13 @@ export default function AdminDashboard() {
               {/* Category Filter Chips */}
               <div className="flex gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
                 {['All', ...categories.map(c => c.name)].map((catName) => {
-                  const isActive = adminFoodCatFilter === catName
-                  const catObj = categories.find(c => c.name === catName)
+                  const isActive = adminFoodCatFilter.toLowerCase() === catName.toLowerCase()
+                  const catObj = categories.find(c => c.name.toLowerCase() === catName.toLowerCase())
                   return (
                     <button
                       key={catName}
                       onClick={() => setAdminFoodCatFilter(catName)}
-                      className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border ${
+                      className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border cursor-pointer ${
                         isActive
                           ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
                           : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
@@ -757,89 +743,143 @@ export default function AdminDashboard() {
             </div>
 
             {/* SUB-SECTION A: NORMAL CAKES */}
-            {cakeSubTab === 'normal' && (
-              <div>
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-serif text-lg font-bold text-[#3D1D0F]">
-                    Normal Cakes Collection (Database)
-                  </h3>
-                  <button
-                    onClick={openAddCake}
-                    className="px-4 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310] transition-colors flex items-center gap-2 shadow-sm"
-                  >
-                    <Plus size={15} /> Add Normal Cake
-                  </button>
-                </div>
+            {cakeSubTab === 'normal' && (() => {
+              const filteredCakes = cakes.filter(c => {
+                const cCat = c.category || 'Chocolate'
+                const matchCat = cakeCatFilter === 'All' || cCat.toLowerCase() === cakeCatFilter.toLowerCase()
+                const matchSrch = c.name.toLowerCase().includes(cakeSearch.toLowerCase())
+                return matchCat && matchSrch
+              })
 
-                {dataLoading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                      <div key={n} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
-                        <div className="aspect-[4/3] bg-gray-200" />
-                        <div className="p-4">
-                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                          <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
-                          <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
-                          <div className="flex gap-2">
-                            <div className="h-8 bg-gray-200 rounded-xl flex-1" />
-                            <div className="h-8 bg-gray-200 rounded-xl flex-1" />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+              return (
+                <div>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+                    <h3 className="font-serif text-lg font-bold text-[#3D1D0F]">
+                      Normal Cakes Collection <span className="text-gray-400 text-sm font-sans font-normal">({filteredCakes.length} of {cakes.length})</span>
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="text"
+                        value={cakeSearch}
+                        onChange={(e) => setCakeSearch(e.target.value)}
+                        placeholder="Search cakes..."
+                        className="border border-gray-200 rounded-2xl px-4 py-2 text-xs text-gray-800 focus:outline-none focus:border-[#6a2e16] bg-white shadow-xs w-48"
+                      />
+                      <button
+                        onClick={openAddCake}
+                        className="px-4 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310] transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap"
+                      >
+                        <Plus size={15} /> Add Normal Cake
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {cakes.map((c) => {
-                      const priceDisp = c.prices?.map(p => `${p.weight}: ₹${p.price}`).join(' | ') || `₹${c.price || 600}`
-                      return (
-                        <div key={c._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col justify-between">
-                          <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
-                            {c.imageUrl ? (
-                              <ImageWithSkeleton
-                                src={c.imageUrl}
-                                alt={c.name}
-                                className="w-full h-full object-cover"
-                                containerClassName="w-full h-full"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-4xl">🎂</div>
-                            )}
-                            <span className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
-                              {c.category || 'Chocolate'}
-                            </span>
-                          </div>
 
-                          <div className="p-4 flex-1 flex flex-col justify-between">
-                            <div>
-                              <h4 className="font-bold text-sm text-gray-900 leading-snug mb-1">{c.name}</h4>
-                              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{c.description}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-extrabold text-[#6a2e16] mb-3">{priceDisp}</p>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => openEditCake(c)}
-                                  className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
-                                  <Pencil size={12} /> Edit
-                                </button>
-                                <button
-                                  onClick={() => deleteCake(c._id)}
-                                  className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
-                                >
-                                  <Trash2 size={12} /> Delete
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                  {/* Cake Category Chips */}
+                  <div className="flex gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+                    {['All', ...CAKE_CATEGORIES].map((catName) => {
+                      const isActive = cakeCatFilter.toLowerCase() === catName.toLowerCase()
+                      return (
+                        <button
+                          key={catName}
+                          onClick={() => setCakeCatFilter(catName)}
+                          className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border cursor-pointer ${
+                            isActive
+                              ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
+                              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                          }`}
+                        >
+                          <span>🎂</span>
+                          <span>{catName}</span>
+                        </button>
                       )
                     })}
                   </div>
-                )}
-              </div>
-            )}
+
+                  {dataLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                        <div key={n} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+                          <div className="aspect-[4/3] bg-gray-200" />
+                          <div className="p-4">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                            <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
+                            <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
+                            <div className="flex gap-2">
+                              <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+                              <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : filteredCakes.length === 0 ? (
+                    <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 shadow-xs">
+                      <p className="text-gray-400 text-sm font-medium">No cakes match your filter.</p>
+                      {(cakeCatFilter !== 'All' || cakeSearch) && (
+                        <button
+                          onClick={() => {
+                            setCakeCatFilter('All')
+                            setCakeSearch('')
+                          }}
+                          className="mt-3 text-xs font-bold text-[#6a2e16] underline"
+                        >
+                          Reset Filters
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                      {filteredCakes.map((c) => {
+                        const priceDisp = c.prices?.map(p => `${p.weight}: ₹${p.price}`).join(' | ') || `₹${c.price || 600}`
+                        return (
+                          <div key={c._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col justify-between">
+                            <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
+                              {c.imageUrl ? (
+                                <ImageWithSkeleton
+                                  src={c.imageUrl}
+                                  alt={c.name}
+                                  className="w-full h-full object-cover"
+                                  containerClassName="w-full h-full"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-4xl">🎂</div>
+                              )}
+                              <span className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
+                                {c.category || 'Chocolate'}
+                              </span>
+                            </div>
+
+                            <div className="p-4 flex-1 flex flex-col justify-between">
+                              <div>
+                                <h4 className="font-bold text-sm text-gray-900 leading-snug mb-1">{c.name}</h4>
+                                <p className="text-xs text-gray-500 line-clamp-2 mb-2">{c.description}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs font-extrabold text-[#6a2e16] mb-3">{priceDisp}</p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => openEditCake(c)}
+                                    className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                                  >
+                                    <Pencil size={12} /> Edit
+                                  </button>
+                                  <button
+                                    onClick={() => deleteCake(c._id)}
+                                    className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                                  >
+                                    <Trash2 size={12} /> Delete
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* SUB-SECTION B: CUSTOM CAKES */}
             {cakeSubTab === 'custom' && (
