@@ -590,7 +590,17 @@ export default function ProductsSection() {
     })()
   }, [])
 
-  const filtered = products
+  // Deduplicate products by name / id to prevent any repeating items
+  const uniqueProductsMap = new Map()
+  products.forEach(p => {
+    const key = p._id ? String(p._id) : p.name
+    if (!uniqueProductsMap.has(key) && !uniqueProductsMap.has(p.name)) {
+      uniqueProductsMap.set(p.name, p)
+    }
+  })
+  const uniqueProducts = Array.from(uniqueProductsMap.values())
+
+  const filtered = uniqueProducts
     .filter(p => {
       if (p.category?.name?.toLowerCase() === 'cakes') return false
       const matchCat = active === 'All' || p.category?.name === active

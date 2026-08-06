@@ -95,6 +95,8 @@ export default function AdminDashboard() {
   // Products & Categories state
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState(DEFAULT_FOOD_CATEGORIES)
+  const [adminFoodCatFilter, setAdminFoodCatFilter] = useState('All')
+  const [adminFoodSearch, setAdminFoodSearch] = useState('')
   const [productForm, setProductForm] = useState({ name: '', category: '', price: '', description: '', image: null })
   const [editingProduct, setEditingProduct] = useState(null)
   const [productModal, setProductModal] = useState(false)
@@ -587,80 +589,134 @@ export default function AdminDashboard() {
       <div className="max-w-6xl mx-auto px-6 py-8">
 
         {/* ─── TAB 1: FOOD PRODUCTS ─── */}
-        {tab === 'products' && (
-          <>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="font-serif text-2xl font-bold text-[#6a2e16]">
-                  Food Products <span className="text-gray-400 text-lg font-sans font-normal">({products.length})</span>
-                </h2>
-                <p className="text-xs text-gray-500 mt-0.5">Manage burgers, shawarmas, fried chicken & beverages</p>
-              </div>
-              <button onClick={openAddProduct} className="px-4 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310] transition-colors flex items-center gap-2 shadow-sm">
-                <Plus size={15} /> Add Food Product
-              </button>
-            </div>
+        {tab === 'products' && (() => {
+          const filteredAdminProducts = products.filter(p => {
+            const matchCat = adminFoodCatFilter === 'All' || p.category?.name === adminFoodCatFilter
+            const matchSearch = p.name.toLowerCase().includes(adminFoodSearch.toLowerCase())
+            return matchCat && matchSearch
+          })
 
-            {dataLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                  <div key={n} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
-                    <div className="aspect-video bg-gray-200" />
-                    <div className="p-4">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
-                      <div className="h-4 bg-gray-200 rounded w-1/4 mb-4" />
-                      <div className="flex gap-2">
-                        <div className="h-8 bg-gray-200 rounded-xl flex-1" />
-                        <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+          return (
+            <>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="font-serif text-2xl font-bold text-[#6a2e16]">
+                    Food Products <span className="text-gray-400 text-lg font-sans font-normal">({filteredAdminProducts.length} of {products.length})</span>
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Manage burgers, shawarmas, fried chicken & beverages</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={adminFoodSearch}
+                    onChange={(e) => setAdminFoodSearch(e.target.value)}
+                    placeholder="Search products..."
+                    className="border border-gray-200 rounded-2xl px-4 py-2 text-xs text-gray-800 focus:outline-none focus:border-[#6a2e16] bg-white shadow-xs w-48"
+                  />
+                  <button onClick={openAddProduct} className="px-4 py-2.5 bg-[#6a2e16] text-white rounded-2xl font-bold text-xs hover:bg-[#522310] transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap">
+                    <Plus size={15} /> Add Food Product
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Filter Chips */}
+              <div className="flex gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+                {['All', ...categories.map(c => c.name)].map((catName) => {
+                  const isActive = adminFoodCatFilter === catName
+                  const catObj = categories.find(c => c.name === catName)
+                  return (
+                    <button
+                      key={catName}
+                      onClick={() => setAdminFoodCatFilter(catName)}
+                      className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border ${
+                        isActive
+                          ? 'bg-[#6a2e16] text-white border-[#6a2e16] shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      <span>{catObj?.icon || (catName === 'All' ? '🍽️' : '🏷️')}</span>
+                      <span>{catName}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {dataLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                    <div key={n} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+                      <div className="aspect-video bg-gray-200" />
+                      <div className="p-4">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                        <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
+                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4" />
+                        <div className="flex gap-2">
+                          <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+                          <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {products.map((p) => (
-                  <div key={p._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="aspect-video bg-gray-100 overflow-hidden relative">
-                      {p.imageUrl ? (
-                        <ImageWithSkeleton
-                          src={p.imageUrl}
-                          alt={p.name}
-                          className="w-full h-full object-cover"
-                          containerClassName="w-full h-full"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl">🍽️</div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-sm text-gray-900 mb-0.5">{p.name}</h3>
-                      <p className="text-[11px] text-gray-500 font-medium mb-2">
-                        {p.category?.icon || ''} {p.category?.name || 'Uncategorized'}
-                      </p>
-                      <p className="font-bold text-sm text-[#6a2e16] mb-3">₹{p.price}</p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openEditProduct(p)}
-                          className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          <Pencil size={12} /> Edit
-                        </button>
-                        <button
-                          onClick={() => deleteProduct(p._id)}
-                          className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 size={12} /> Delete
-                        </button>
+                  ))}
+                </div>
+              ) : filteredAdminProducts.length === 0 ? (
+                <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 shadow-xs">
+                  <p className="text-gray-400 text-sm font-medium">No products match your filter.</p>
+                  {(adminFoodCatFilter !== 'All' || adminFoodSearch) && (
+                    <button
+                      onClick={() => {
+                        setAdminFoodCatFilter('All')
+                        setAdminFoodSearch('')
+                      }}
+                      className="mt-3 text-xs font-bold text-[#6a2e16] underline"
+                    >
+                      Reset Filters
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {filteredAdminProducts.map((p) => (
+                    <div key={p._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="aspect-video bg-gray-100 overflow-hidden relative">
+                        {p.imageUrl ? (
+                          <ImageWithSkeleton
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                            containerClassName="w-full h-full"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-4xl">🍽️</div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-bold text-sm text-gray-900 mb-0.5">{p.name}</h3>
+                        <p className="text-[11px] text-gray-500 font-medium mb-2">
+                          {p.category?.icon || ''} {p.category?.name || 'Uncategorized'}
+                        </p>
+                        <p className="font-bold text-sm text-[#6a2e16] mb-3">₹{p.price}</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEditProduct(p)}
+                            className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <Pencil size={12} /> Edit
+                          </button>
+                          <button
+                            onClick={() => deleteProduct(p._id)}
+                            className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 size={12} /> Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+                  ))}
+                </div>
+              )}
+            </>
+          )
+        })()}
 
         {/* ─── TAB 2: SEPARATE CAKE ADDING SECTION (NORMAL vs CUSTOM) ─── */}
         {tab === 'cakes' && (
