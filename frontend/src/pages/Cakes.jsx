@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Search, ArrowLeft, X } from 'lucide-react'
+import ImageWithSkeleton from '../components/ImageWithSkeleton'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -260,8 +261,9 @@ const DEMO_MENU_CAKES = [
 
 export default function Cakes() {
   const navigate = useNavigate()
-  const [cakes, setCakes] = useState(DEMO_MENU_CAKES)
-  const [customCakes, setCustomCakes] = useState(CUSTOM_STATIC_CAKES)
+  const [cakes, setCakes] = useState([])
+  const [customCakes, setCustomCakes] = useState([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState('All')
@@ -272,6 +274,7 @@ export default function Cakes() {
   useEffect(() => {
     window.scrollTo(0, 0)
     ;(async () => {
+      setLoading(true)
       try {
         const [cRes, custRes, pRes] = await Promise.allSettled([
           axios.get(`${API}/api/cakes`),
@@ -310,14 +313,12 @@ export default function Cakes() {
           apiStandardCakes = [...apiStandardCakes, ...legacyStandard]
         }
 
-        if (apiCustomCakes.length > 0) {
-          setCustomCakes([...apiCustomCakes, ...CUSTOM_STATIC_CAKES])
-        }
-        if (apiStandardCakes.length > 0) {
-          setCakes([...apiStandardCakes, ...DEMO_MENU_CAKES])
-        }
+        setCustomCakes(apiCustomCakes)
+        setCakes(apiStandardCakes)
       } catch {
-        /* static fallbacks */
+        /* empty handler */
+      } finally {
+        setLoading(false)
       }
     })()
   }, [])
@@ -451,8 +452,24 @@ export default function Cakes() {
       {/* ── Scrollable Content ── */}
       <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '192px' : '170px' }}>
 
-        {/* ── CUSTOMIZED CAKES SECTION (PURE IMAGE GALLERY WITH FULL-SIZE LIGHTBOX) ── */}
-        {activeCategory === 'Custom' ? (
+        {/* Skeleton Grid when loading */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div
+                key={i}
+                className="bg-white border border-[#EDE8DE] overflow-hidden flex flex-col justify-between animate-pulse"
+              >
+                <div className="w-full aspect-[4/3] sm:aspect-square bg-gray-200" />
+                <div className="p-3 text-center">
+                  <div className="h-4 bg-gray-200 rounded mx-auto w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded mx-auto w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : activeCategory === 'Custom' ? (
+          /* ── CUSTOMIZED CAKES SECTION (PURE IMAGE GALLERY WITH FULL-SIZE LIGHTBOX) ── */
           <div>
             <div className="text-center mb-4">
               <h2 className="font-serif italic font-bold text-lg text-[#6a2e16]">
@@ -478,15 +495,16 @@ export default function Cakes() {
                     onClick={() => setLightboxImg(imgUrl)}
                     className="aspect-square bg-gray-100 rounded-none overflow-hidden cursor-pointer group border border-[#EDE8DE] hover:border-[#6a2e16] transition-all duration-300 relative shadow-2xs"
                   >
-                    <img
+                    <ImageWithSkeleton
                       src={imgUrl}
                       alt="Customized Cake"
                       className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                      containerClassName="w-full h-full"
                       onError={(e) => {
                         e.target.src = '/cake1.png'
                       }}
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                    <div className="absolute inset-0 z-10 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
                       <span className="opacity-0 group-hover:opacity-100 bg-black/75 text-white text-[10px] font-bold px-2 py-1 rounded-none transition-opacity uppercase tracking-wider">
                         🔍 Full View
                       </span>
@@ -524,10 +542,11 @@ export default function Cakes() {
                     {/* Top Image Container */}
                     <div className="w-full aspect-[4/3] sm:aspect-square bg-[#F5EDE3] overflow-hidden relative">
                       {item.imageUrl ? (
-                        <img
+                        <ImageWithSkeleton
                           src={item.imageUrl}
                           alt={item.name}
                           className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
+                          containerClassName="w-full h-full"
                           onError={(e) => {
                             e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80'
                           }}
@@ -537,7 +556,7 @@ export default function Cakes() {
                       )}
 
                       {weightBadge && (
-                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none">
+                        <div className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-none">
                           {weightBadge}
                         </div>
                       )}
@@ -576,10 +595,11 @@ export default function Cakes() {
             >
               <X size={22} />
             </button>
-            <img
+            <ImageWithSkeleton
               src={lightboxImg}
               alt="Customized Cake Full View"
               className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-none border border-white/20"
+              containerClassName="max-w-full max-h-[85vh] flex items-center justify-center"
               onClick={e => e.stopPropagation()}
             />
           </div>
@@ -599,10 +619,11 @@ export default function Cakes() {
           >
             <div className="w-full h-64 bg-[#F5EDE3] relative">
               {selectedItem.imageUrl ? (
-                <img
+                <ImageWithSkeleton
                   src={selectedItem.imageUrl}
                   alt={selectedItem.name}
                   className="w-full h-full object-cover rounded-none"
+                  containerClassName="w-full h-full"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-6xl">🎂</div>

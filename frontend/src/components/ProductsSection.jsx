@@ -17,6 +17,7 @@ import {
   ArrowDown,
   ArrowUpDown,
 } from 'lucide-react'
+import ImageWithSkeleton from './ImageWithSkeleton'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -526,7 +527,7 @@ const DEMO_FOOD = [
 
 export default function ProductsSection() {
   const navigate = useNavigate()
-  const [products, setProducts] = useState(DEMO_FOOD)
+  const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([
     { _id: 'cat-0', name: 'Biryani' },
     { _id: 'cat-1', name: 'Pizza' },
@@ -550,6 +551,7 @@ export default function ProductsSection() {
 
   useEffect(() => {
     ;(async () => {
+      setLoading(true)
       try {
         const [pRes, cRes] = await Promise.all([
           axios.get(`${API}/api/products`),
@@ -557,7 +559,7 @@ export default function ProductsSection() {
         ])
         if (pRes.data && pRes.data.length > 0) {
           const apiProducts = pRes.data.filter(p => p.category?.name?.toLowerCase() !== 'cakes')
-          setProducts([...apiProducts, ...DEMO_FOOD])
+          setProducts(apiProducts)
         }
         if (cRes.data && cRes.data.length > 0) {
           const apiCats = cRes.data.filter(c => c.name.toLowerCase() !== 'cakes')
@@ -581,7 +583,9 @@ export default function ProductsSection() {
           setCategories(merged)
         }
       } catch {
-        /* fallback to demo items */
+        /* empty handler */
+      } finally {
+        setLoading(false)
       }
     })()
   }, [])
@@ -726,7 +730,30 @@ export default function ProductsSection() {
       {/* ── Scrollable Content (padded below fixed navbar) ── */}
       <div className="max-w-md mx-auto px-4 pb-12" style={{ paddingTop: searchOpen ? '170px' : '148px' }}>
 
-        {filtered.length === 0 && (
+        {/* Skeleton Card List during initial fetch */}
+        {loading ? (
+          <div className="flex flex-col gap-2.5">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="flex bg-white rounded-2xl overflow-hidden border border-gray-100 p-1.5 animate-pulse"
+              >
+                <div className="w-[120px] sm:w-[140px] h-[95px] sm:h-[105px] rounded-xl bg-gray-200 shrink-0" />
+                <div className="flex-1 flex flex-col justify-between py-1 px-3">
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded-md w-3/4 mb-2" />
+                    <div className="h-3 bg-gray-200 rounded-md w-full mb-1" />
+                    <div className="h-3 bg-gray-200 rounded-md w-1/2" />
+                  </div>
+                  <div className="flex items-center justify-between mt-2 pt-1 border-t border-gray-50">
+                    <div className="h-4 bg-gray-200 rounded-md w-12" />
+                    <div className="h-4 bg-gray-200 rounded-full w-10" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-400 text-sm font-medium">No menu items found.</p>
             {search && (
@@ -735,66 +762,67 @@ export default function ProductsSection() {
               </button>
             )}
           </div>
+        ) : (
+          /* Product Card List */
+          <div className="flex flex-col gap-2.5">
+            {filtered.map((item, index) => {
+              const displayPrice = item.options ? item.options[0].price : item.price
+              const hasOptions = item.options && item.options.length > 0
+
+              return (
+                <div
+                  key={item._id || index}
+                  onClick={() => openItemModal(item)}
+                  className="flex bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-200 cursor-pointer p-1.5 group"
+                >
+                  {/* Product Image */}
+                  <div className="w-[120px] sm:w-[140px] h-[95px] sm:h-[105px] rounded-xl overflow-hidden bg-gray-100 shrink-0 relative">
+                    {item.imageUrl ? (
+                      <ImageWithSkeleton
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        containerClassName="w-full h-full"
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80'
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl text-gray-300">🍽️</div>
+                    )}
+
+                    {item.category?.name && (
+                      <span className="absolute top-1.5 left-1.5 z-10 bg-black/60 backdrop-blur-xs text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md">
+                        {item.category.name}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 flex flex-col justify-between py-1 px-3">
+                    <div>
+                      <h3 className="font-semibold text-sm text-gray-900 leading-snug group-hover:text-[#6a2e16] transition-colors">
+                        {item.name}
+                      </h3>
+                      <p className="text-[11px] text-gray-500 line-clamp-2 mt-0.5 leading-tight">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-gray-50">
+                      <span className="font-extrabold text-sm text-[#6a2e16]">
+                        ₹{displayPrice} {hasOptions && <span className="text-[10px] text-gray-400 font-normal">({item.options[0].size})</span>}
+                      </span>
+                      <span className="text-[10px] font-bold text-[#6a2e16] bg-[#6a2e16]/10 px-2 py-0.5 rounded-full">
+                        View
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         )}
-
-        {/* Product Card List */}
-        <div className="flex flex-col gap-2.5">
-          {filtered.map((item, index) => {
-            const displayPrice = item.options ? item.options[0].price : item.price
-            const hasOptions = item.options && item.options.length > 0
-
-            return (
-              <div
-                key={item._id || index}
-                onClick={() => openItemModal(item)}
-                className="flex bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-200 cursor-pointer p-1.5 group"
-              >
-                {/* Product Image */}
-                <div className="w-[120px] sm:w-[140px] h-[95px] sm:h-[105px] rounded-xl overflow-hidden bg-gray-100 shrink-0 relative">
-                  {item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80'
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl text-gray-300">🍽️</div>
-                  )}
-
-                  {item.category?.name && (
-                    <span className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-xs text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md">
-                      {item.category.name}
-                    </span>
-                  )}
-                </div>
-
-                {/* Details */}
-                <div className="flex-1 flex flex-col justify-between py-1 px-3">
-                  <div>
-                    <h3 className="font-semibold text-sm text-gray-900 leading-snug group-hover:text-[#6a2e16] transition-colors">
-                      {item.name}
-                    </h3>
-                    <p className="text-[11px] text-gray-500 line-clamp-2 mt-0.5 leading-tight">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-2 pt-1 border-t border-gray-50">
-                    <span className="font-extrabold text-sm text-[#6a2e16]">
-                      ₹{displayPrice} {hasOptions && <span className="text-[10px] text-gray-400 font-normal">({item.options[0].size})</span>}
-                    </span>
-                    <span className="text-[10px] font-bold text-[#6a2e16] bg-[#6a2e16]/10 px-2 py-0.5 rounded-full">
-                      View
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
       </div>
 
       {/* ── Item Detail Modal ── */}
@@ -809,10 +837,11 @@ export default function ProductsSection() {
           >
             <div className="w-full h-56 bg-gray-100 relative">
               {selectedItem.imageUrl ? (
-                <img
+                <ImageWithSkeleton
                   src={selectedItem.imageUrl}
                   alt={selectedItem.name}
                   className="w-full h-full object-cover"
+                  containerClassName="w-full h-full"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-5xl">🍽️</div>

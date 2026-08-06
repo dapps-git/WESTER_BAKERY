@@ -16,6 +16,7 @@ import {
   Sparkles,
   Layers,
 } from 'lucide-react'
+import ImageWithSkeleton from '../components/ImageWithSkeleton'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -122,6 +123,9 @@ export default function AdminDashboard() {
   const [customImgPreview, setCustomImgPreview] = useState(null)
   const customFileRef = useRef()
 
+  // Data Loading State
+  const [dataLoading, setDataLoading] = useState(true)
+
   // Category state
   const [catForm, setCatForm] = useState({ name: '', icon: '🍽️' })
   const [editingCat, setEditingCat] = useState(null)
@@ -136,6 +140,7 @@ export default function AdminDashboard() {
   }
 
   const loadData = async () => {
+    setDataLoading(true)
     try {
       const [p, c, ck, cc] = await Promise.allSettled([
         axios.get(`${API}/api/products`),
@@ -157,6 +162,8 @@ export default function AdminDashboard() {
       if (cc.status === 'fulfilled') setCustomCakes(cc.value.data)
     } catch {
       notify('Could not connect to backend', false)
+    } finally {
+      setDataLoading(false)
     }
   }
 
@@ -594,40 +601,64 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {products.map((p) => (
-                <div key={p._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="aspect-video bg-gray-100 overflow-hidden relative">
-                    {p.imageUrl ? (
-                      <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">🍽️</div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-sm text-gray-900 mb-0.5">{p.name}</h3>
-                    <p className="text-[11px] text-gray-500 font-medium mb-2">
-                      {p.category?.icon || ''} {p.category?.name || 'Uncategorized'}
-                    </p>
-                    <p className="font-bold text-sm text-[#6a2e16] mb-3">₹{p.price}</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => openEditProduct(p)}
-                        className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <Pencil size={12} /> Edit
-                      </button>
-                      <button
-                        onClick={() => deleteProduct(p._id)}
-                        className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 size={12} /> Delete
-                      </button>
+            {dataLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <div key={n} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+                    <div className="aspect-video bg-gray-200" />
+                    <div className="p-4">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
+                      <div className="h-4 bg-gray-200 rounded w-1/4 mb-4" />
+                      <div className="flex gap-2">
+                        <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+                        <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {products.map((p) => (
+                  <div key={p._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="aspect-video bg-gray-100 overflow-hidden relative">
+                      {p.imageUrl ? (
+                        <ImageWithSkeleton
+                          src={p.imageUrl}
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                          containerClassName="w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl">🍽️</div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-sm text-gray-900 mb-0.5">{p.name}</h3>
+                      <p className="text-[11px] text-gray-500 font-medium mb-2">
+                        {p.category?.icon || ''} {p.category?.name || 'Uncategorized'}
+                      </p>
+                      <p className="font-bold text-sm text-[#6a2e16] mb-3">₹{p.price}</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openEditProduct(p)}
+                          className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <Pencil size={12} /> Edit
+                        </button>
+                        <button
+                          onClick={() => deleteProduct(p._id)}
+                          className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 size={12} /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
 
@@ -684,49 +715,73 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {cakes.map((c) => {
-                    const priceDisp = c.prices?.map(p => `${p.weight}: ₹${p.price}`).join(' | ') || `₹${c.price || 600}`
-                    return (
-                      <div key={c._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col justify-between">
-                        <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
-                          {c.imageUrl ? (
-                            <img src={c.imageUrl} alt={c.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-4xl">🎂</div>
-                          )}
-                          <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
-                            {c.category || 'Chocolate'}
-                          </span>
-                        </div>
-
-                        <div className="p-4 flex-1 flex flex-col justify-between">
-                          <div>
-                            <h4 className="font-bold text-sm text-gray-900 leading-snug mb-1">{c.name}</h4>
-                            <p className="text-xs text-gray-500 line-clamp-2 mb-2">{c.description}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-extrabold text-[#6a2e16] mb-3">{priceDisp}</p>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => openEditCake(c)}
-                                className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
-                              >
-                                <Pencil size={12} /> Edit
-                              </button>
-                              <button
-                                onClick={() => deleteCake(c._id)}
-                                className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
-                              >
-                                <Trash2 size={12} /> Delete
-                              </button>
-                            </div>
+                {dataLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                      <div key={n} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+                        <div className="aspect-[4/3] bg-gray-200" />
+                        <div className="p-4">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                          <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
+                          <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
+                          <div className="flex gap-2">
+                            <div className="h-8 bg-gray-200 rounded-xl flex-1" />
+                            <div className="h-8 bg-gray-200 rounded-xl flex-1" />
                           </div>
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {cakes.map((c) => {
+                      const priceDisp = c.prices?.map(p => `${p.weight}: ₹${p.price}`).join(' | ') || `₹${c.price || 600}`
+                      return (
+                        <div key={c._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col justify-between">
+                          <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
+                            {c.imageUrl ? (
+                              <ImageWithSkeleton
+                                src={c.imageUrl}
+                                alt={c.name}
+                                className="w-full h-full object-cover"
+                                containerClassName="w-full h-full"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-4xl">🎂</div>
+                            )}
+                            <span className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
+                              {c.category || 'Chocolate'}
+                            </span>
+                          </div>
+
+                          <div className="p-4 flex-1 flex flex-col justify-between">
+                            <div>
+                              <h4 className="font-bold text-sm text-gray-900 leading-snug mb-1">{c.name}</h4>
+                              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{c.description}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-extrabold text-[#6a2e16] mb-3">{priceDisp}</p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => openEditCake(c)}
+                                  className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                  <Pencil size={12} /> Edit
+                                </button>
+                                <button
+                                  onClick={() => deleteCake(c._id)}
+                                  className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold border border-red-100 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                                >
+                                  <Trash2 size={12} /> Delete
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
@@ -745,28 +800,46 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {customCakes.map((cc) => {
-                    const imgUrl = cc.imageUrl?.startsWith('/uploads/') ? `${API}${cc.imageUrl}` : cc.imageUrl
-                    return (
-                      <div key={cc._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group relative">
-                        <div className="aspect-square bg-gray-100 overflow-hidden">
-                          <img src={imgUrl} alt={cc.name || 'Custom Cake'} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="p-3 flex items-center justify-between">
-                          <span className="text-xs font-semibold text-gray-700 truncate">{cc.name || 'Custom Cake'}</span>
-                          <button
-                            onClick={() => deleteCustomCake(cc._id)}
-                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete Photo"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                {dataLoading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                      <div key={n} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+                        <div className="aspect-square bg-gray-200" />
+                        <div className="p-3">
+                          <div className="h-4 bg-gray-200 rounded w-3/4" />
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {customCakes.map((cc) => {
+                      const imgUrl = cc.imageUrl?.startsWith('/uploads/') ? `${API}${cc.imageUrl}` : cc.imageUrl
+                      return (
+                        <div key={cc._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group relative">
+                          <div className="aspect-square bg-gray-100 overflow-hidden">
+                            <ImageWithSkeleton
+                              src={imgUrl}
+                              alt={cc.name || 'Custom Cake'}
+                              className="w-full h-full object-cover"
+                              containerClassName="w-full h-full"
+                            />
+                          </div>
+                          <div className="p-3 flex items-center justify-between">
+                            <span className="text-xs font-semibold text-gray-700 truncate">{cc.name || 'Custom Cake'}</span>
+                            <button
+                              onClick={() => deleteCustomCake(cc._id)}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Photo"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </>
